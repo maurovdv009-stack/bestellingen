@@ -278,7 +278,7 @@
 
                     if (tab === 'activeOrders') {
                         row.innerHTML = `
-                            <td>#${index + 1}</td>
+                            <td>${order.ID}</td>
                             <td>${order.Naam}</td>
                             <td>${order.Email}</td>
                             <td>${order.Ophaaldatum}</td>
@@ -293,7 +293,7 @@
                         `;
                     } else { // history tab
                         row.innerHTML = `
-                            <td>#${index + 1}</td>
+                            <td>${order.ID || 'N.v.t.'}</td>
                             <td>${order.Naam}</td>
                             <td>${order.Email}</td>
                             <td>${order.Ophaaldatum}</td>
@@ -312,6 +312,11 @@
         
         // Functies voor actieknoppen
         async function completeOrder(id, orderData) {
+            if (!id) {
+                alert('Fout: De bestelling heeft geen geldig ID om te verwijderen.');
+                return;
+            }
+
             // Verwijder de bestelling uit de actieve tabel
             const deleteResponse = await fetch(`${ACTIVE_ORDERS_API_URL}/ID/${id}`, {
                 method: 'DELETE',
@@ -340,6 +345,11 @@
         }
 
         async function deleteOrder(id) {
+            if (!id) {
+                alert('Fout: De bestelling heeft geen geldig ID om te verwijderen.');
+                return;
+            }
+            
             const confirmed = confirm('Weet je zeker dat je deze bestelling wilt verwijderen? Dit kan niet ongedaan gemaakt worden.');
             if (!confirmed) return;
 
