@@ -71,7 +71,7 @@
         }
 
         .tab-button.active:hover {
-            background-color: var(--hover-blue);
+            background-color: #0056b3;
         }
 
         .dashboard-section {
@@ -181,7 +181,7 @@
             background-color: #c82333;
         }
 
-        #loading-message {
+        .loading-message {
             text-align: center;
             font-size: 1.2rem;
             color: #888;
@@ -244,11 +244,9 @@
     </div>
 
     <script>
-        // ** VERVANG DEZE URL'S MET JOUW SHEETDB API URLS **
-        const ACTIVE_ORDERS_API_URL = 'https://sheetdb.io/api/v1/87wzrsee3fkxg'; // Bestaande bestellingen
-        const HISTORY_API_URL = 'JOUW_TWEEDE_SHEETDB_API_URL_VOOR_GESCHIEDENIS'; // NIEUWE API voor afgewerkte orders
+        const ACTIVE_ORDERS_API_URL = 'https://sheetdb.io/api/v1/87wzrsee3fkxg';
+        const HISTORY_API_URL = 'https://sheetdb.io/api/v1/v0fivehp16xzd';
 
-        // Functie om bestellingen op te halen en weer te geven
         async function fetchOrders(tab) {
             const tableBody = document.getElementById(tab === 'activeOrders' ? 'active-orders-table-body' : 'history-table-body');
             const loadingMessage = document.getElementById(tab === 'activeOrders' ? 'loading-active-orders' : 'loading-history');
@@ -339,7 +337,6 @@
 
             alert('Bestelling is succesvol afgerond en verplaatst naar de geschiedenis.');
             fetchOrders('activeOrders'); // Vernieuw de actieve tabel
-            fetchOrders('history'); // Vernieuw de geschiedenis
         }
 
         async function deleteOrder(rowId) {
@@ -387,8 +384,6 @@
         // Laad de actieve bestellingen bij het openen van de pagina
         window.onload = () => {
             fetchOrders('activeOrders');
-            // Zorg ervoor dat de geschiedenis ook een keer wordt geladen, maar verborgen blijft.
-            // Dit is handig voor de eerste keer, maar je kunt ook fetchOrders('history') aanroepen bij het tab-klik event.
         };
     </script>
 </body>
