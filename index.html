@@ -320,11 +320,7 @@
                             <td>€${totalPriceDisplay}</td>
                             <td>
                                 <div class="table-actions">
-                                    <button class="action-btn delete-btn" 
-                                            data-order-name="${order.Naam}" 
-                                            data-order-email="${order.Email}" 
-                                            data-order-date="${order.Ophaaldatum}"
-                                    >Verwijder</button>
+                                    <button class="action-btn delete-btn" data-order-id="${order.ID}">Verwijder</button>
                                 </div>
                             </td>
                         `;
@@ -369,7 +365,7 @@
             fetchOrders('activeOrders');
         }
 
-        async function deleteOrder(id) {
+        async function deleteOrder(id, isHistory = false) {
             if (!id) {
                 alert('Fout: De bestelling heeft geen geldig ID om te verwijderen.');
                 return;
@@ -378,37 +374,15 @@
             const confirmed = confirm('Weet je zeker dat je deze bestelling wilt verwijderen? Dit kan niet ongedaan gemaakt worden.');
             if (!confirmed) return;
 
-            const deleteResponse = await fetch(`${ACTIVE_ORDERS_API_URL}/ID/${id}`, {
+            const url = isHistory ? HISTORY_API_URL : ACTIVE_ORDERS_API_URL;
+            const deleteResponse = await fetch(`${url}/ID/${id}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' }
             });
 
             if (deleteResponse.ok) {
                 alert('Bestelling succesvol verwijderd.');
-                fetchOrders('activeOrders');
-            } else {
-                alert('Fout bij het verwijderen van de bestelling.');
-            }
-        }
-
-        async function deleteHistoryOrder(name, email, date) {
-            if (!name || !email || !date) {
-                alert('Fout: Niet alle bestelgegevens zijn aanwezig. Verwijderen mislukt.');
-                return;
-            }
-            
-            const confirmed = confirm('Weet je zeker dat je dit item uit de geschiedenis wilt verwijderen?');
-            if (!confirmed) return;
-
-            // SheetDB zoekt op basis van de eerste kolom. Omdat oude items geen ID hebben, gebruiken we meerdere velden om het uniek te maken.
-            const deleteResponse = await fetch(`${HISTORY_API_URL}/Naam/${name}/Email/${email}/Ophaaldatum/${date}`, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' }
-            });
-
-            if (deleteResponse.ok) {
-                alert('Item succesvol verwijderd uit de geschiedenis.');
-                fetchOrders('history');
+                fetchOrders(isHistory ? 'history' : 'activeOrders');
             } else {
                 alert('Fout bij het verwijderen van het item.');
             }
@@ -421,14 +395,11 @@
                 completeOrder(id, orderData);
             }
             if (event.target.classList.contains('delete-btn')) {
+                const id = event.target.dataset.orderId;
                 if (event.target.closest('#activeOrders')) {
-                    const id = event.target.dataset.orderId;
                     deleteOrder(id);
                 } else if (event.target.closest('#history')) {
-                    const name = event.target.dataset.orderName;
-                    const email = event.target.dataset.orderEmail;
-                    const date = event.target.dataset.orderDate;
-                    deleteHistoryOrder(name, email, date);
+                    deleteOrder(id, true); // De 'true' geeft aan dat het de geschiedenis-tabel is
                 }
             }
             if (event.target.classList.contains('tab-button')) {
