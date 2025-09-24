@@ -1,205 +1,169 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
-<title>Ijssalon Dashboard</title>
-<style>
-:root {--bg:#1f1f1f;--fg:#f0f0f0;--card:#2b2b2b;--border:#444;--accent:#3fa9f5;--accent-hover:#2d89d8;}
-body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);}
-header{display:flex;justify-content:space-between;align-items:center;padding:1em 2em;background:var(--card);border-bottom:1px solid var(--border);}
-.brand{font-weight:bold;font-size:1.5em;}
-.nav-btn{background:var(--accent);color:#fff;border:none;padding:0.6em 1.2em;border-radius:0.6em;cursor:pointer;margin-left:0.5em;transition:all 0.2s ease;}
-.nav-btn:hover{background:var(--accent-hover);transform:scale(1.05);}
-main{padding:2em;}
-.filter-input{width:100%;padding:0.6em;border-radius:0.6em;border:1px solid var(--border);background:var(--card);color:var(--fg);margin-bottom:1.5em;font-size:1em;}
-table{width:100%;border-collapse:separate;border-spacing:0 0.5em;}
-th,td{padding:0.8em 1em;text-align:left;}
-th{background:var(--card);border-radius:0.6em 0.6em 0 0;}
-td{background:var(--card);border-radius:0.6em;transition:background 0.2s ease;}
-tr:hover td{background:rgba(63,169,245,0.2);}
-.status-btn{background:#2ecc71;color:#fff;border:none;padding:0.4em 0.8em;border-radius:0.5em;cursor:pointer;font-weight:bold;margin-right:0.3em;transition:all 0.2s ease;}
-.status-btn:hover{background:#27ae60;transform:scale(1.1);}
-.delete-btn{background:red;color:#fff;border:none;padding:0.4em 0.8em;border-radius:0.5em;cursor:pointer;font-weight:bold;transition:all 0.2s ease;}
-.delete-btn:hover{background:#ff5555;transform:scale(1.1);}
-.stats-section{margin-top:2em;}
-canvas{background:var(--card);border-radius:1em;padding:1em;margin-top:1em;}
-.reset-btn{background:var(--accent);color:#fff;border:none;padding:0.5em 1em;border-radius:0.6em;cursor:pointer;margin-top:1em;}
-.yellow-bg{background:#f9d976 !important;color:#000;}
-.green-bg{background:#2ecc71 !important;color:#fff;}
-#loginScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:flex;justify-content:center;align-items:center;z-index:100;}
-#loginScreen form{background:var(--card);padding:2em;border-radius:1em;display:flex;flex-direction:column;width:320px;}
-#loginScreen input{margin:0.5em 0;padding:0.5em;border-radius:0.5em;border:1px solid var(--border);background:var(--bg);color:var(--fg);}
-#loginScreen button{margin-top:1em;background:var(--accent);color:#fff;border:none;padding:0.6em;border-radius:0.6em;cursor:pointer;transition:all 0.2s ease;}
-#loginScreen button:hover{background:var(--accent-hover);}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — IJssalon Bestellingen</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+        :root {
+            --dark-background: #1a1a1a;
+            --card-background: #2a2a2a;
+            --text-color: #f0f0f0;
+            --accent-blue: #007bff;
+            --header-height: 70px;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--dark-background);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--accent-blue);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .refresh-btn {
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            background-color: #0056b3; /* Een donkerdere tint blauw */
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .orders-table th,
+        .orders-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #444;
+        }
+
+        .orders-table th {
+            background-color: #333;
+            font-weight: 600;
+        }
+
+        .orders-table tr:hover {
+            background-color: #383838;
+        }
+
+        .items-list {
+            list-style: none;
+        }
+
+        .items-list li {
+            font-size: 0.9em;
+            color: #ccc;
+        }
+        
+        #loading-message {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #888;
+        }
+    </style>
 </head>
 <body>
 
-<div id="loginScreen">
-  <form onsubmit="return login(event)">
-    <h2>Login Dashboard</h2>
-    <input id="username" placeholder="Gebruikersnaam">
-    <input id="password" type="password" placeholder="Wachtwoord">
-    <button type="submit">Login</button>
-  </form>
-</div>
+    <div class="dashboard-container">
+        <h1>IJssalon Bestellingen Dashboard</h1>
+        <button class="refresh-btn" onclick="fetchOrders()">Vernieuw Bestellingen</button>
+        
+        <p id="loading-message">Laden van bestellingen...</p>
 
-<header style="display:none;">
-  <div class="brand">Dashboard IJssalon</div>
-  <div>
-    <button class="nav-btn" onclick="showTab('orders')">Bestellingen</button>
-    <button class="nav-btn" onclick="showTab('history')">Geschiedenis</button>
-    <button class="nav-btn" onclick="showTab('stats')">Statistieken</button>
-  </div>
-</header>
+        <table class="orders-table">
+            <thead>
+                <tr>
+                    <th>Bestelling ID</th>
+                    <th>Naam</th>
+                    <th>E-mail</th>
+                    <th>Ophaaldatum</th>
+                    <th>Items</th>
+                    <th>Totaalprijs</th>
+                </tr>
+            </thead>
+            <tbody id="orders-table-body">
+                </tbody>
+        </table>
+    </div>
 
-<main style="display:none;">
-<div id="ordersTab">
-<input type="text" class="filter-input" id="filterInput" placeholder="Zoek op naam, email, levermoment of producten..." oninput="renderOrders()">
-<table id="ordersTable">
-  <thead>
-    <tr>
-      <th>Tijd</th>
-      <th>Naam</th>
-      <th>Email</th>
-      <th>Levermoment</th>
-      <th>Producten</th>
-      <th>Totaal (€)</th>
-      <th>Acties</th>
-    </tr>
-  </thead>
-  <tbody id="ordersBody"></tbody>
-</table>
-</div>
+    <script>
+        const SHEETDB_API_URL = 'https://sheetdb.io/api/v1/87wzrsee3fkxg';
 
-<div id="historyTab" style="display:none;">
-<h2>Afgeronde bestellingen</h2>
-<table id="historyTable">
-  <thead>
-    <tr>
-      <th>Tijd</th>
-      <th>Naam</th>
-      <th>Email</th>
-      <th>Levermoment</th>
-      <th>Producten</th>
-      <th>Totaal (€)</th>
-    </tr>
-  </thead>
-  <tbody id="historyBody"></tbody>
-</table>
-</div>
+        async function fetchOrders() {
+            const tableBody = document.getElementById('orders-table-body');
+            const loadingMessage = document.getElementById('loading-message');
+            
+            tableBody.innerHTML = '';
+            loadingMessage.style.display = 'block';
 
-<div id="statsTab" style="display:none;" class="stats-section">
-<h2>Statistieken</h2>
-<canvas id="salesChart" width="400" height="200"></canvas>
-<canvas id="flavorsChart" width="400" height="200"></canvas>
-<button class="reset-btn" onclick="renderStats()">Reset grafieken</button>
-<p>Totaal afgeronde bestellingen: <span id="totalOrders">0</span></p>
-</div>
-</main>
+            try {
+                const response = await fetch(SHEETDB_API_URL);
+                if (!response.ok) {
+                    throw new Error('Netwerkrespons was niet ok');
+                }
+                const orders = await response.json();
+                
+                loadingMessage.style.display = 'none';
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-const apiUrl = "https://sheetdb.io/api/v1/i1hu5kkuad2pt";
-let orders=[], history=[];
+                if (orders.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="6">Geen bestellingen gevonden.</td></tr>';
+                    return;
+                }
 
-function login(e){
-  e.preventDefault();
-  const user = document.getElementById("username").value;
-  const pass = document.getElementById("password").value;
-  if(user==="admin" && pass==="wachtwoord123"){
-    document.getElementById("loginScreen").style.display="none";
-    document.querySelector("header").style.display="flex";
-    document.querySelector("main").style.display="block";
-    fetchOrders();
-  } else {alert("Ongeldige login!");}
-}
+                orders.forEach((order, index) => {
+                    const row = document.createElement('tr');
+                    
+                    const itemsHtml = JSON.parse(order.Items).map(item => `
+                        <li>${item.name} (${item.quantity} L) - €${(item.price * item.quantity).toFixed(2).replace('.', ',')}</li>
+                    `).join('');
 
-function fetchOrders(){
-  fetch(apiUrl)
-    .then(res=>res.json())
-    .then(data=>{
-      orders = data.filter(o=>!o.Afgerond);
-      history = data.filter(o=>o.Afgerond);
-      renderOrders(); renderHistory(); renderStats();
-    }).catch(err=>console.error(err));
-}
+                    row.innerHTML = `
+                        <td>#${index + 1}</td>
+                        <td>${order.Naam}</td>
+                        <td>${order.Email}</td>
+                        <td>${order.Ophaaldatum}</td>
+                        <td><ul class="items-list">${itemsHtml}</ul></td>
+                        <td>€${parseFloat(order.Totaalprijs).toFixed(2).replace('.', ',')}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
 
-function showTab(tab){
-  document.getElementById('ordersTab').style.display = tab==='orders'?'block':'none';
-  document.getElementById('historyTab').style.display = tab==='history'?'block':'none';
-  document.getElementById('statsTab').style.display = tab==='stats'?'block':'none';
-  if(tab==='stats') renderStats();
-}
+            } catch (error) {
+                console.error('Fout bij het ophalen van bestellingen:', error);
+                loadingMessage.textContent = 'Fout bij het laden van bestellingen. Probeer het later opnieuw.';
+            }
+        }
 
-function renderOrders(){
-  const tbody = document.getElementById('ordersBody');
-  const filter = document.getElementById('filterInput').value.toLowerCase();
-  tbody.innerHTML='';
-  const filtered = orders.filter(o =>
-    o.Naam.toLowerCase().includes(filter) ||
-    o.Email.toLowerCase().includes(filter) ||
-    o.Levermoment.toLowerCase().includes(filter) ||
-    o.Producten.toLowerCase().includes(filter)
-  );
-  if(filtered.length===0){tbody.innerHTML='<tr><td colspan="7">Geen bestellingen gevonden.</td></tr>';return;}
-  filtered.forEach(o=>{
-    const row=document.createElement('tr');
-    row.innerHTML=`<td>${o.Tijd}</td><td>${o.Naam}</td><td>${o.Email}</td><td>${o.Levermoment}</td><td>${o.Producten}</td><td>${o.Totaal}</td>
-      <td><button class="status-btn" onclick='completeOrder("${o.id}")'>Afgerond</button>
-      <button class="delete-btn" onclick='deleteOrder("${o.id}")'>Verwijder</button></td>`;
-    tbody.appendChild(row);
-  });
-}
+        // Laad bestellingen bij het openen van de pagina
+        window.onload = fetchOrders;
+    </script>
 
-function completeOrder(id){
-  fetch(`${apiUrl}/${id}`,{
-    method:"PATCH",
-    body:JSON.stringify({data:{Afgerond:true}}),
-    headers:{"Content-Type":"application/json"}
-  }).then(()=>fetchOrders());
-}
-
-function deleteOrder(id){
-  if(confirm("Weet je zeker dat je deze bestelling wilt verwijderen?")){
-    fetch(`${apiUrl}/${id}`,{method:"DELETE"}).then(()=>fetchOrders());
-  }
-}
-
-function renderHistory(){
-  const tbody = document.getElementById('historyBody'); tbody.innerHTML='';
-  if(history.length===0){tbody.innerHTML='<tr><td colspan="6">Geen afgeronde bestellingen.</td></tr>';return;}
-  history.forEach(o=>{
-    const row=document.createElement('tr');
-    row.innerHTML=`<td>${o.Tijd}</td><td>${o.Naam}</td><td>${o.Email}</td><td>${o.Levermoment}</td><td>${o.Producten}</td><td>${o.Totaal}</td>`;
-    tbody.appendChild(row);
-  });
-}
-
-function renderStats(){
-  document.getElementById("totalOrders").textContent = history.length;
-  const salesLabels = history.map(o=>o.Levermoment);
-  const salesData = history.map(o=>parseFloat(o.Totaal.replace(',','.')));
-  if(window.salesChartInstance) window.salesChartInstance.destroy();
-  window.salesChartInstance = new Chart(document.getElementById('salesChart'),{
-    type:'bar',
-    data:{labels:salesLabels,datasets:[{label:'Omzet per bestelling (€)',data:salesData,backgroundColor:'rgba(63,169,245,0.7)'}]},
-    options:{responsive:true,plugins:{legend:{display:false}}}
-  });
-
-  const flavorCount={};
-  history.forEach(o=>{o.Producten.split(',').forEach(p=>{
-    const name=p.trim().split(' x ')[0];
-    flavorCount[name]=(flavorCount[name]||0)+parseInt(p.trim().split(' x ')[1]);
-  });});
-  const flavorLabels=Object.keys(flavorCount); const flavorData=Object.values(flavorCount);
-  if(window.flavorsChartInstance) window.flavorsChartInstance.destroy();
-  window.flavorsChartInstance = new Chart(document.getElementById('flavorsChart'),{
-    type:'pie',
-    data:{labels:flavorLabels,datasets:[{data:flavorData,backgroundColor:['#3fa9f5','#2d89d8','#ff6384','#36a2eb','#ffcd56','#4bc0c0']}]},
-    options:{responsive:true}
-  });
-}
-</script>
 </body>
 </html>
