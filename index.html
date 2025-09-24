@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard — IJssalon Bestellingen</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
 
@@ -191,6 +192,52 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
+
+        /* Custom Alert Styles */
+        .custom-alert-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .custom-alert-box {
+            background-color: var(--card-background);
+            color: var(--text-color);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .custom-alert-box p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .custom-alert-ok-btn {
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .custom-alert-ok-btn:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -244,6 +291,13 @@
         </div>
     </div>
 
+    <div id="custom-alert" class="custom-alert-container hidden">
+        <div class="custom-alert-box">
+            <p id="custom-alert-message"></p>
+            <button id="custom-alert-ok-btn" class="custom-alert-ok-btn">OK</button>
+        </div>
+    </div>
+
     <script>
         const ACTIVE_ORDERS_API_URL = 'https://sheetdb.io/api/v1/pnz12bqkys5sc';
         const HISTORY_API_URL = 'https://sheetdb.io/api/v1/w3rznl3fnrp3n';
@@ -261,6 +315,23 @@
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
             return `${day}/${month}/${year}`;
+        }
+
+        // Functie voor de aangepaste meldingen
+        function showAlert(message) {
+            const customAlert = document.getElementById('custom-alert');
+            const customAlertMessage = document.getElementById('custom-alert-message');
+            const customAlertOkBtn = document.getElementById('custom-alert-ok-btn');
+
+            customAlertMessage.textContent = message;
+            customAlert.classList.remove('hidden');
+
+            return new Promise(resolve => {
+                customAlertOkBtn.onclick = () => {
+                    customAlert.classList.add('hidden');
+                    resolve();
+                };
+            });
         }
 
         async function fetchOrders(tab) {
@@ -305,8 +376,8 @@
                             <td>€${totalPriceDisplay}</td>
                             <td>
                                 <div class="table-actions">
-                                    <button class="action-btn complete-btn" data-order-id="${order.ID}" data-order-data='${JSON.stringify(order)}'>Afgemaakt</button>
-                                    <button class="action-btn delete-btn" data-order-id="${order.ID}">Verwijder</button>
+                                    <button class="action-btn complete-btn" data-order-id="${order.ID}" data-order-data='${JSON.stringify(order)}' aria-label="Afgemaakt"><i class="fas fa-check"></i></button>
+                                    <button class="action-btn delete-btn" data-order-id="${order.ID}" aria-label="Verwijder"><i class="fas fa-trash"></i></button>
                                 </div>
                             </td>
                         `;
@@ -320,7 +391,7 @@
                             <td>€${totalPriceDisplay}</td>
                             <td>
                                 <div class="table-actions">
-                                    <button class="action-btn delete-btn" data-order-id="${order.ID}">Verwijder</button>
+                                    <button class="action-btn delete-btn" data-order-id="${order.ID}" aria-label="Verwijder"><i class="fas fa-trash"></i></button>
                                 </div>
                             </td>
                         `;
@@ -336,7 +407,7 @@
         
         async function completeOrder(id, orderData) {
             if (!id) {
-                alert('Fout: De bestelling heeft geen geldig ID om te verplaatsen.');
+                showAlert('Fout: De bestelling heeft geen geldig ID om te verplaatsen.');
                 return;
             }
 
@@ -346,7 +417,7 @@
             });
 
             if (!deleteResponse.ok) {
-                alert('Fout bij het verplaatsen van de bestelling.');
+                showAlert('Fout bij het verplaatsen van de bestelling.');
                 return;
             }
 
@@ -357,17 +428,17 @@
             });
 
             if (!addResponse.ok) {
-                alert('Bestelling verplaatst, maar niet correct toegevoegd aan geschiedenis.');
+                showAlert('Bestelling verplaatst, maar niet correct toegevoegd aan geschiedenis.');
                 return;
             }
 
-            alert('Bestelling is succesvol afgerond en verplaatst naar de geschiedenis.');
+            await showAlert('Bestelling is succesvol afgerond en verplaatst naar de geschiedenis.');
             fetchOrders('activeOrders');
         }
 
         async function deleteOrder(id, isHistory = false) {
             if (!id) {
-                alert('Fout: De bestelling heeft geen geldig ID om te verwijderen.');
+                showAlert('Fout: De bestelling heeft geen geldig ID om te verwijderen.');
                 return;
             }
             
@@ -381,25 +452,27 @@
             });
 
             if (deleteResponse.ok) {
-                alert('Bestelling succesvol verwijderd.');
+                await showAlert('Bestelling succesvol verwijderd.');
                 fetchOrders(isHistory ? 'history' : 'activeOrders');
             } else {
-                alert('Fout bij het verwijderen van het item.');
+                showAlert('Fout bij het verwijderen van het item.');
             }
         }
 
         document.addEventListener('click', (event) => {
-            if (event.target.classList.contains('complete-btn')) {
-                const id = event.target.dataset.orderId;
-                const orderData = JSON.parse(event.target.dataset.orderData);
+            if (event.target.classList.contains('complete-btn') || event.target.closest('.complete-btn')) {
+                const button = event.target.closest('.complete-btn');
+                const id = button.dataset.orderId;
+                const orderData = JSON.parse(button.dataset.orderData);
                 completeOrder(id, orderData);
             }
-            if (event.target.classList.contains('delete-btn')) {
-                const id = event.target.dataset.orderId;
-                if (event.target.closest('#activeOrders')) {
+            if (event.target.classList.contains('delete-btn') || event.target.closest('.delete-btn')) {
+                const button = event.target.closest('.delete-btn');
+                const id = button.dataset.orderId;
+                if (button.closest('#activeOrders')) {
                     deleteOrder(id);
-                } else if (event.target.closest('#history')) {
-                    deleteOrder(id, true); // De 'true' geeft aan dat het de geschiedenis-tabel is
+                } else if (button.closest('#history')) {
+                    deleteOrder(id, true);
                 }
             }
             if (event.target.classList.contains('tab-button')) {
