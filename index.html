@@ -248,10 +248,8 @@
         const ACTIVE_ORDERS_API_URL = 'https://sheetdb.io/api/v1/pnz12bqkys5sc';
         const HISTORY_API_URL = 'https://sheetdb.io/api/v1/w3rznl3fnrp3n';
 
-        // Functie om een Google Sheets datumgetal te converteren naar een DD/MM/JJJJ string
         function convertSheetDate(serial) {
             if (typeof serial !== 'number' || isNaN(serial)) {
-                // Controleert of het een normale datumstring is, zoals "2025-12-25"
                 if (typeof serial === 'string' && serial.match(/^\d{4}-\d{2}-\d{2}$/)) {
                     const [year, month, day] = serial.split('-');
                     return `${day}/${month}/${year}`;
@@ -322,7 +320,11 @@
                             <td>€${totalPriceDisplay}</td>
                             <td>
                                 <div class="table-actions">
-                                    <button class="action-btn delete-btn history-delete-btn" data-order-id="${order.ID || order.Naam}">Verwijder</button>
+                                    <button class="action-btn delete-btn" 
+                                            data-order-name="${order.Naam}" 
+                                            data-order-email="${order.Email}" 
+                                            data-order-date="${order.Ophaaldatum}"
+                                    >Verwijder</button>
                                 </div>
                             </td>
                         `;
@@ -336,14 +338,12 @@
             }
         }
         
-        // Functies voor actieknoppen
         async function completeOrder(id, orderData) {
             if (!id) {
                 alert('Fout: De bestelling heeft geen geldig ID om te verplaatsen.');
                 return;
             }
 
-            // Verwijder de bestelling uit de actieve tabel
             const deleteResponse = await fetch(`${ACTIVE_ORDERS_API_URL}/ID/${id}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' }
@@ -354,7 +354,6 @@
                 return;
             }
 
-            // Voeg de bestelling toe aan de geschiedenis
             const addResponse = await fetch(HISTORY_API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -367,7 +366,7 @@
             }
 
             alert('Bestelling is succesvol afgerond en verplaatst naar de geschiedenis.');
-            fetchOrders('activeOrders'); // Vernieuw de actieve tabel
+            fetchOrders('activeOrders');
         }
 
         async function deleteOrder(id) {
@@ -386,36 +385,35 @@
 
             if (deleteResponse.ok) {
                 alert('Bestelling succesvol verwijderd.');
-                fetchOrders('activeOrders'); // Vernieuw de tabel
+                fetchOrders('activeOrders');
             } else {
                 alert('Fout bij het verwijderen van de bestelling.');
             }
         }
 
-        async function deleteHistoryOrder(id) {
-            if (!id) {
-                alert('Fout: De bestelling heeft geen geldig ID om te verwijderen.');
+        async function deleteHistoryOrder(name, email, date) {
+            if (!name || !email || !date) {
+                alert('Fout: Niet alle bestelgegevens zijn aanwezig. Verwijderen mislukt.');
                 return;
             }
             
             const confirmed = confirm('Weet je zeker dat je dit item uit de geschiedenis wilt verwijderen?');
             if (!confirmed) return;
 
-            // SheetDB gebruikt de eerste kolom als unieke sleutel. Oude bestellingen hebben mogelijk geen ID, dus we gebruiken de naam.
-            const deleteResponse = await fetch(`${HISTORY_API_URL}/ID/${id}`, {
+            // SheetDB zoekt op basis van de eerste kolom. Omdat oude items geen ID hebben, gebruiken we meerdere velden om het uniek te maken.
+            const deleteResponse = await fetch(`${HISTORY_API_URL}/Naam/${name}/Email/${email}/Ophaaldatum/${date}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' }
             });
 
             if (deleteResponse.ok) {
                 alert('Item succesvol verwijderd uit de geschiedenis.');
-                fetchOrders('history'); // Vernieuw de geschiedenis tabel
+                fetchOrders('history');
             } else {
                 alert('Fout bij het verwijderen van het item.');
             }
         }
 
-        // Event listener voor de knoppen
         document.addEventListener('click', (event) => {
             if (event.target.classList.contains('complete-btn')) {
                 const id = event.target.dataset.orderId;
@@ -423,12 +421,14 @@
                 completeOrder(id, orderData);
             }
             if (event.target.classList.contains('delete-btn')) {
-                const id = event.target.dataset.orderId;
-                // Bepaal welke delete-functie te gebruiken op basis van de tabel
                 if (event.target.closest('#activeOrders')) {
+                    const id = event.target.dataset.orderId;
                     deleteOrder(id);
                 } else if (event.target.closest('#history')) {
-                    deleteHistoryOrder(id);
+                    const name = event.target.dataset.orderName;
+                    const email = event.target.dataset.orderEmail;
+                    const date = event.target.dataset.orderDate;
+                    deleteHistoryOrder(name, email, date);
                 }
             }
             if (event.target.classList.contains('tab-button')) {
@@ -445,7 +445,6 @@
             }
         });
 
-        // Laad de actieve bestellingen bij het openen van de pagina
         window.onload = () => {
             fetchOrders('activeOrders');
         };
