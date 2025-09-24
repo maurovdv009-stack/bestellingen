@@ -24,34 +24,33 @@ tr:hover td{background:rgba(63,169,245,0.2);}
 .stats-section{margin-top:2em;}
 canvas{background:var(--card);border-radius:1em;padding:1em;margin-top:1em;}
 .reset-btn{background:var(--accent);color:#fff;border:none;padding:0.5em 1em;border-radius:0.6em;cursor:pointer;margin-top:1em;}
-.reset-btn:hover{background:var(--accent-hover);transform:scale(1.05);}
 .yellow-bg{background:#f9d976 !important;color:#000;}
 .green-bg{background:#2ecc71 !important;color:#fff;}
-#loginModal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:100;}
-#loginModal .login-content{background:var(--card);padding:2em;border-radius:1em;width:320px;text-align:center;}
-#loginModal input{width:100%;padding:0.5em;margin:0.5em 0;border-radius:0.5em;border:1px solid var(--border);background:var(--bg);color:var(--fg);}
-#loginModal button{background:var(--accent);color:#fff;border:none;padding:0.5em 1em;border-radius:0.5em;cursor:pointer;}
-#loginModal button:hover{background:var(--accent-hover);}
+#loginScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:flex;justify-content:center;align-items:center;z-index:100;}
+#loginScreen form{background:var(--card);padding:2em;border-radius:1em;display:flex;flex-direction:column;width:320px;}
+#loginScreen input{margin:0.5em 0;padding:0.5em;border-radius:0.5em;border:1px solid var(--border);background:var(--bg);color:var(--fg);}
+#loginScreen button{margin-top:1em;background:var(--accent);color:#fff;border:none;padding:0.6em;border-radius:0.6em;cursor:pointer;transition:all 0.2s ease;}
+#loginScreen button:hover{background:var(--accent-hover);}
 </style>
 </head>
 <body>
 
-<div id="loginModal">
-  <div class="login-content">
+<div id="loginScreen">
+  <form onsubmit="return login(event)">
     <h2>Login Dashboard</h2>
-    <input type="text" id="loginUser" placeholder="Username">
-    <input type="password" id="loginPass" placeholder="Password">
-    <button onclick="login()">Login</button>
-  </div>
+    <input id="username" placeholder="Gebruikersnaam">
+    <input id="password" type="password" placeholder="Wachtwoord">
+    <button type="submit">Login</button>
+  </form>
 </div>
 
 <header style="display:none;">
-<div class="brand">Dashboard IJssalon</div>
-<div>
-<button class="nav-btn" onclick="showTab('orders')">Bestellingen</button>
-<button class="nav-btn" onclick="showTab('history')">Geschiedenis</button>
-<button class="nav-btn" onclick="showTab('stats')">Statistieken</button>
-</div>
+  <div class="brand">Dashboard IJssalon</div>
+  <div>
+    <button class="nav-btn" onclick="showTab('orders')">Bestellingen</button>
+    <button class="nav-btn" onclick="showTab('history')">Geschiedenis</button>
+    <button class="nav-btn" onclick="showTab('stats')">Statistieken</button>
+  </div>
 </header>
 
 <main style="display:none;">
@@ -101,23 +100,29 @@ canvas{background:var(--card);border-radius:1em;padding:1em;margin-top:1em;}
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-const USERNAME = "admin";
-const PASSWORD = "wachtwoord123";
+const apiUrl = "https://sheetdb.io/api/v1/i1hu5kkuad2pt";
+let orders=[], history=[];
 
-let orders = JSON.parse(localStorage.getItem("orders")) || [];
-let history = JSON.parse(localStorage.getItem("history")) || [];
-
-function login() {
-  const u = document.getElementById("loginUser").value;
-  const p = document.getElementById("loginPass").value;
-  if(u===USERNAME && p===PASSWORD){
-    document.getElementById("loginModal").style.display="none";
+function login(e){
+  e.preventDefault();
+  const user = document.getElementById("username").value;
+  const pass = document.getElementById("password").value;
+  if(user==="admin" && pass==="wachtwoord123"){
+    document.getElementById("loginScreen").style.display="none";
     document.querySelector("header").style.display="flex";
     document.querySelector("main").style.display="block";
-    renderOrders(); renderHistory();
-  } else {
-    alert("Verkeerde username of password!");
-  }
+    fetchOrders();
+  } else {alert("Ongeldige login!");}
+}
+
+function fetchOrders(){
+  fetch(apiUrl)
+    .then(res=>res.json())
+    .then(data=>{
+      orders = data.filter(o=>!o.Afgerond);
+      history = data.filter(o=>o.Afgerond);
+      renderOrders(); renderHistory(); renderStats();
+    }).catch(err=>console.error(err));
 }
 
 function showTab(tab){
@@ -130,111 +135,68 @@ function showTab(tab){
 function renderOrders(){
   const tbody = document.getElementById('ordersBody');
   const filter = document.getElementById('filterInput').value.toLowerCase();
-  tbody.innerHTML = '';
-
+  tbody.innerHTML='';
   const filtered = orders.filter(o =>
     o.Naam.toLowerCase().includes(filter) ||
     o.Email.toLowerCase().includes(filter) ||
     o.Levermoment.toLowerCase().includes(filter) ||
     o.Producten.toLowerCase().includes(filter)
   );
-
-  if(filtered.length===0){
-    tbody.innerHTML='<tr><td colspan="7">Geen bestellingen gevonden.</td></tr>';
-    return;
-  }
-
-  filtered.forEach((o)=>{
-    const index = orders.indexOf(o); // correct index
-    const row = document.createElement('tr');
-
-    const today = new Date();
-    const parts = o.Levermoment.split('/');
-    const leverDate = new Date(parts[2], parts[1]-1, parts[0]);
-    if(leverDate - today <= 3*24*60*60*1000 && leverDate >= today) row.className = 'yellow-bg';
-
-    row.innerHTML = `
-      <td>${o.Tijd}</td>
-      <td>${o.Naam}</td>
-      <td>${o.Email}</td>
-      <td>${o.Levermoment}</td>
-      <td>${o.Producten}</td>
-      <td>${o.Totaal}</td>
-      <td>
-        <button class="status-btn" onclick="completeOrder(${index})">Afgerond</button>
-        <button class="delete-btn" onclick="deleteOrder(${index})">Verwijder</button>
-      </td>
-    `;
+  if(filtered.length===0){tbody.innerHTML='<tr><td colspan="7">Geen bestellingen gevonden.</td></tr>';return;}
+  filtered.forEach(o=>{
+    const row=document.createElement('tr');
+    row.innerHTML=`<td>${o.Tijd}</td><td>${o.Naam}</td><td>${o.Email}</td><td>${o.Levermoment}</td><td>${o.Producten}</td><td>${o.Totaal}</td>
+      <td><button class="status-btn" onclick='completeOrder("${o.id}")'>Afgerond</button>
+      <button class="delete-btn" onclick='deleteOrder("${o.id}")'>Verwijder</button></td>`;
     tbody.appendChild(row);
   });
 }
 
-function completeOrder(i){
-  const order = orders.splice(i,1)[0];
-  history.push(order);
-  localStorage.setItem('orders', JSON.stringify(orders));
-  localStorage.setItem('history', JSON.stringify(history));
-  renderOrders();
-  renderHistory();
-  renderStats();
+function completeOrder(id){
+  fetch(`${apiUrl}/${id}`,{
+    method:"PATCH",
+    body:JSON.stringify({data:{Afgerond:true}}),
+    headers:{"Content-Type":"application/json"}
+  }).then(()=>fetchOrders());
 }
 
-function deleteOrder(i){
+function deleteOrder(id){
   if(confirm("Weet je zeker dat je deze bestelling wilt verwijderen?")){
-    orders.splice(i,1);
-    localStorage.setItem('orders', JSON.stringify(orders));
-    renderOrders();
+    fetch(`${apiUrl}/${id}`,{method:"DELETE"}).then(()=>fetchOrders());
   }
 }
 
 function renderHistory(){
-  const tbody = document.getElementById('historyBody');
-  tbody.innerHTML = '';
-  if(history.length===0){
-    tbody.innerHTML='<tr><td colspan="6">Geen afgeronde bestellingen.</td></tr>';
-    return;
-  }
+  const tbody = document.getElementById('historyBody'); tbody.innerHTML='';
+  if(history.length===0){tbody.innerHTML='<tr><td colspan="6">Geen afgeronde bestellingen.</td></tr>';return;}
   history.forEach(o=>{
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${o.Tijd}</td>
-      <td>${o.Naam}</td>
-      <td>${o.Email}</td>
-      <td>${o.Levermoment}</td>
-      <td>${o.Producten}</td>
-      <td>${o.Totaal}</td>
-    `;
+    const row=document.createElement('tr');
+    row.innerHTML=`<td>${o.Tijd}</td><td>${o.Naam}</td><td>${o.Email}</td><td>${o.Levermoment}</td><td>${o.Producten}</td><td>${o.Totaal}</td>`;
     tbody.appendChild(row);
   });
 }
 
 function renderStats(){
   document.getElementById("totalOrders").textContent = history.length;
-
-  const salesLabels = history.map(o => o.Levermoment);
-  const salesData = history.map(o => parseFloat(o.Totaal.replace(',','.')));
-
+  const salesLabels = history.map(o=>o.Levermoment);
+  const salesData = history.map(o=>parseFloat(o.Totaal.replace(',','.')));
   if(window.salesChartInstance) window.salesChartInstance.destroy();
-  window.salesChartInstance = new Chart(document.getElementById('salesChart'), {
-    type: 'bar',
-    data: {labels: salesLabels,datasets:[{label:'Omzet per bestelling (€)',data:salesData,backgroundColor:'rgba(63,169,245,0.7)'}]},
-    options: {responsive:true,plugins:{legend:{display:false}}}
+  window.salesChartInstance = new Chart(document.getElementById('salesChart'),{
+    type:'bar',
+    data:{labels:salesLabels,datasets:[{label:'Omzet per bestelling (€)',data:salesData,backgroundColor:'rgba(63,169,245,0.7)'}]},
+    options:{responsive:true,plugins:{legend:{display:false}}}
   });
 
-  const flavorCount = {};
-  history.forEach(o=>{
-    o.Producten.split(',').forEach(p=>{
-      const name = p.trim().split(' x ')[0];
-      flavorCount[name] = (flavorCount[name]||0)+parseInt(p.trim().split(' x ')[1]);
-    });
-  });
-  const flavorLabels = Object.keys(flavorCount);
-  const flavorData = Object.values(flavorCount);
-
+  const flavorCount={};
+  history.forEach(o=>{o.Producten.split(',').forEach(p=>{
+    const name=p.trim().split(' x ')[0];
+    flavorCount[name]=(flavorCount[name]||0)+parseInt(p.trim().split(' x ')[1]);
+  });});
+  const flavorLabels=Object.keys(flavorCount); const flavorData=Object.values(flavorCount);
   if(window.flavorsChartInstance) window.flavorsChartInstance.destroy();
-  window.flavorsChartInstance = new Chart(document.getElementById('flavorsChart'), {
-    type: 'pie',
-    data: {labels: flavorLabels,datasets:[{data:flavorData,backgroundColor:['#3fa9f5','#2d89d8','#ff6384','#36a2eb','#ffcd56','#4bc0c0']}]},
+  window.flavorsChartInstance = new Chart(document.getElementById('flavorsChart'),{
+    type:'pie',
+    data:{labels:flavorLabels,datasets:[{data:flavorData,backgroundColor:['#3fa9f5','#2d89d8','#ff6384','#36a2eb','#ffcd56','#4bc0c0']}]},
     options:{responsive:true}
   });
 }
