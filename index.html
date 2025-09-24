@@ -244,8 +244,8 @@
     </div>
 
     <script>
-        const ACTIVE_ORDERS_API_URL = 'https://sheetdb.io/api/v1/87wzrsee3fkxg';
-        const HISTORY_API_URL = 'https://sheetdb.io/api/v1/v0fivehp16xzd';
+        const ACTIVE_ORDERS_API_URL = 'https://sheetdb.io/api/v1/pnz12bqkys5sc';
+        const HISTORY_API_URL = 'https://sheetdb.io/api/v1/w3rznl3fnrp3n';
 
         async function fetchOrders(tab) {
             const tableBody = document.getElementById(tab === 'activeOrders' ? 'active-orders-table-body' : 'history-table-body');
@@ -286,8 +286,8 @@
                             <td>€${parseFloat(order.Totaalprijs).toFixed(2).replace('.', ',')}</td>
                             <td>
                                 <div class="table-actions">
-                                    <button class="action-btn complete-btn" data-order-row-id="${order.row_id}" data-order-data='${JSON.stringify(order)}'>Afgemaakt</button>
-                                    <button class="action-btn delete-btn" data-order-row-id="${order.row_id}">Verwijder</button>
+                                    <button class="action-btn complete-btn" data-order-id="${order.ID}" data-order-data='${JSON.stringify(order)}'>Afgemaakt</button>
+                                    <button class="action-btn delete-btn" data-order-id="${order.ID}">Verwijder</button>
                                 </div>
                             </td>
                         `;
@@ -311,9 +311,9 @@
         }
         
         // Functies voor actieknoppen
-        async function completeOrder(rowId, orderData) {
+        async function completeOrder(id, orderData) {
             // Verwijder de bestelling uit de actieve tabel
-            const deleteResponse = await fetch(`${ACTIVE_ORDERS_API_URL}/row_id/${rowId}`, {
+            const deleteResponse = await fetch(`${ACTIVE_ORDERS_API_URL}/ID/${id}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' }
             });
@@ -339,11 +339,11 @@
             fetchOrders('activeOrders'); // Vernieuw de actieve tabel
         }
 
-        async function deleteOrder(rowId) {
+        async function deleteOrder(id) {
             const confirmed = confirm('Weet je zeker dat je deze bestelling wilt verwijderen? Dit kan niet ongedaan gemaakt worden.');
             if (!confirmed) return;
 
-            const deleteResponse = await fetch(`${ACTIVE_ORDERS_API_URL}/row_id/${rowId}`, {
+            const deleteResponse = await fetch(`${ACTIVE_ORDERS_API_URL}/ID/${id}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' }
             });
@@ -359,13 +359,13 @@
         // Event listener voor de knoppen
         document.addEventListener('click', (event) => {
             if (event.target.classList.contains('complete-btn')) {
-                const rowId = event.target.dataset.orderRowId;
+                const id = event.target.dataset.orderId;
                 const orderData = JSON.parse(event.target.dataset.orderData);
-                completeOrder(rowId, orderData);
+                completeOrder(id, orderData);
             }
             if (event.target.classList.contains('delete-btn')) {
-                const rowId = event.target.dataset.orderRowId;
-                deleteOrder(rowId);
+                const id = event.target.dataset.orderId;
+                deleteOrder(id);
             }
             if (event.target.classList.contains('tab-button')) {
                 const tab = event.target.dataset.tab;
