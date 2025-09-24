@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard IJssalon</title>
+<title>IJssalon Dashboard</title>
 <style>
 :root {--bg:#1f1f1f;--fg:#f0f0f0;--card:#2b2b2b;--border:#444;--accent:#3fa9f5;--accent-hover:#2d89d8;}
 body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);}
@@ -24,21 +24,22 @@ tr:hover td{background:rgba(63,169,245,0.2);}
 .stats-section{margin-top:2em;}
 canvas{background:var(--card);border-radius:1em;padding:1em;margin-top:1em;}
 .reset-btn{background:var(--accent);color:#fff;border:none;padding:0.5em 1em;border-radius:0.6em;cursor:pointer;margin-top:1em;}
-.reset-btn:hover{background:var(--accent-hover);transform:scale(1.05);}
-.yellow-bg{background:#f9d976 !important;color:#000;}
-.green-bg{background:#2ecc71 !important;color:#fff;}
 .login-container{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;}
-.login-container input{padding:0.6em;margin:0.5em;border-radius:0.6em;border:1px solid var(--border);background:var(--card);color:var(--fg);}
-.login-container button{background:var(--accent);color:#fff;border:none;padding:0.6em 1.2em;border-radius:0.6em;cursor:pointer;}
+.login-box{background:var(--card);padding:2em;border-radius:1em;display:flex;flex-direction:column;gap:1em;}
+.login-box input{padding:0.6em;border-radius:0.6em;border:1px solid var(--border);background:var(--bg);color:var(--fg);}
+.login-box button{background:var(--accent);color:#fff;border:none;padding:0.6em 1.2em;border-radius:0.6em;cursor:pointer;}
+.login-box button:hover{background:var(--accent-hover);transform:scale(1.05);}
 </style>
 </head>
 <body>
 
-<div id="loginScreen" class="login-container">
-<h2>Login Dashboard</h2>
-<input id="loginUser" placeholder="Gebruikersnaam">
-<input id="loginPass" placeholder="Wachtwoord" type="password">
-<button onclick="login()">Login</button>
+<div id="loginPage" class="login-container">
+  <div class="login-box">
+    <h2>Login Dashboard</h2>
+    <input id="username" placeholder="Gebruikersnaam">
+    <input id="password" type="password" placeholder="Wachtwoord">
+    <button onclick="login()">Login</button>
+  </div>
 </div>
 
 <div id="dashboard" style="display:none;">
@@ -53,11 +54,17 @@ canvas{background:var(--card);border-radius:1em;padding:1em;margin-top:1em;}
 
 <main>
 <div id="ordersTab">
-<input type="text" class="filter-input" id="filterInput" placeholder="Zoek..." oninput="renderOrders()">
+<input type="text" class="filter-input" id="filterInput" placeholder="Zoek op naam, email, levermoment of producten..." oninput="renderOrders()">
 <table id="ordersTable">
   <thead>
     <tr>
-      <th>Tijd</th><th>Naam</th><th>Email</th><th>Levermoment</th><th>Producten</th><th>Totaal (€)</th><th>Acties</th>
+      <th>Tijd</th>
+      <th>Naam</th>
+      <th>Email</th>
+      <th>Levermoment</th>
+      <th>Producten</th>
+      <th>Totaal (€)</th>
+      <th>Acties</th>
     </tr>
   </thead>
   <tbody id="ordersBody"></tbody>
@@ -68,7 +75,14 @@ canvas{background:var(--card);border-radius:1em;padding:1em;margin-top:1em;}
 <h2>Afgeronde bestellingen</h2>
 <table id="historyTable">
   <thead>
-    <tr><th>Tijd</th><th>Naam</th><th>Email</th><th>Levermoment</th><th>Producten</th><th>Totaal (€)</th></tr>
+    <tr>
+      <th>Tijd</th>
+      <th>Naam</th>
+      <th>Email</th>
+      <th>Levermoment</th>
+      <th>Producten</th>
+      <th>Totaal (€)</th>
+    </tr>
   </thead>
   <tbody id="historyBody"></tbody>
 </table>
@@ -86,27 +100,19 @@ canvas{background:var(--card);border-radius:1em;padding:1em;margin-top:1em;}
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-const DASHBOARD_USER="admin"; // zet je gebruikersnaam
-const DASHBOARD_PASS="ijs123"; // zet je wachtwoord
-const SHEETDB_URL="https://sheetdb.io/api/v1/<JE_API_KEY>"; // dezelfde SheetDB API key
+const SHEETDB_URL = "https://sheetdb.io/api/v1/0uiactqsr99zi"; // jouw SheetDB URL
+let orders = [];
+let history = [];
 
-let orders=[], history=[];
-
+// LOGIN
 function login(){
-  const user=document.getElementById("loginUser").value;
-  const pass=document.getElementById("loginPass").value;
-  if(user===DASHBOARD_USER && pass===DASHBOARD_PASS){
-    document.getElementById("loginScreen").style.display="none";
+  const user=document.getElementById("username").value;
+  const pass=document.getElementById("password").value;
+  if(user==="mauro" && pass==="ijs123"){ 
+    document.getElementById("loginPage").style.display="none";
     document.getElementById("dashboard").style.display="block";
     fetchOrders();
-  } else alert("Verkeerde login!");
-}
-
-function fetchOrders(){
-  fetch(SHEETDB_URL)
-    .then(r=>r.json())
-    .then(data=>{orders=data;renderOrders();})
-    .catch(err=>console.error(err));
+  }else{ alert("Foute gebruikersnaam of wachtwoord."); }
 }
 
 function showTab(tab){
@@ -116,58 +122,108 @@ function showTab(tab){
   if(tab==='stats') renderStats();
 }
 
+function fetchOrders(){
+  fetch(SHEETDB_URL)
+    .then(r=>r.json())
+    .then(data=>{
+      orders = data;
+      history = data.filter(o=>o.Status==="Afgerond");
+      renderOrders();
+      renderHistory();
+      renderStats();
+    }).catch(err=>console.error(err));
+}
+
 function renderOrders(){
-  const tbody=document.getElementById('ordersBody');
-  const filter=document.getElementById('filterInput').value.toLowerCase();
+  const tbody=document.getElementById("ordersBody");
+  const filter=document.getElementById("filterInput").value.toLowerCase();
   tbody.innerHTML="";
-  const filtered=orders.filter(o=>
+
+  const filtered=orders.filter(o=> 
     o.Naam.toLowerCase().includes(filter)||
     o.Email.toLowerCase().includes(filter)||
     o.Levermoment.toLowerCase().includes(filter)||
     o.Producten.toLowerCase().includes(filter)
   );
-  if(filtered.length===0){tbody.innerHTML='<tr><td colspan="7">Geen bestellingen</td></tr>';return;}
+
+  if(filtered.length===0){tbody.innerHTML='<tr><td colspan="7">Geen bestellingen gevonden.</td></tr>';return;}
+
   filtered.forEach((o,i)=>{
-    const row=document.createElement('tr');
-    row.innerHTML=`
-      <td>${o.Tijd}</td>
+    const row=document.createElement("tr");
+    row.innerHTML=`<td>${o.Tijd}</td>
       <td>${o.Naam}</td>
       <td>${o.Email}</td>
       <td>${o.Levermoment}</td>
       <td>${o.Producten}</td>
       <td>${o.Totaal}</td>
       <td>
-        <button class="status-btn" onclick="completeOrder(${i})">Afgerond</button>
-        <button class="delete-btn" onclick="deleteOrder(${i})">Verwijder</button>
-      </td>
-    `;
+        <button class="status-btn" onclick="completeOrder(${o._id})">Afgerond</button>
+        <button class="delete-btn" onclick="deleteOrder(${o._id})">Verwijder</button>
+      </td>`;
     tbody.appendChild(row);
   });
 }
 
-function completeOrder(i){
-  const order=orders.splice(i,1)[0];
-  history.push(order);
-  renderOrders(); renderHistory(); renderStats();
+function completeOrder(id){
+  fetch(`${SHEETDB_URL}/${id}`,{
+    method:"PATCH",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({data:{Status:"Afgerond"}})
+  }).then(()=>fetchOrders());
 }
 
-function deleteOrder(i){
-  if(confirm("Weet je zeker dat je wilt verwijderen?")){orders.splice(i,1);renderOrders();}
+function deleteOrder(id){
+  if(confirm("Weet je zeker dat je deze bestelling wilt verwijderen?")){
+    fetch(`${SHEETDB_URL}/${id}`,{method:"DELETE"})
+      .then(()=>fetchOrders());
+  }
 }
 
 function renderHistory(){
-  const tbody=document.getElementById('historyBody');
+  const tbody=document.getElementById("historyBody");
   tbody.innerHTML="";
   if(history.length===0){tbody.innerHTML='<tr><td colspan="6">Geen afgeronde bestellingen.</td></tr>';return;}
   history.forEach(o=>{
-    const row=document.createElement('tr');
-    row.innerHTML=`<td>${o.Tijd}</td><td>${o.Naam}</td><td>${o.Email}</td><td>${o.Levermoment}</td><td>${o.Producten}</td><td>${o.Totaal}</td>`;
+    const row=document.createElement("tr");
+    row.innerHTML=`<td>${o.Tijd}</td>
+      <td>${o.Naam}</td>
+      <td>${o.Email}</td>
+      <td>${o.Levermoment}</td>
+      <td>${o.Producten}</td>
+      <td>${o.Totaal}</td>`;
     tbody.appendChild(row);
   });
 }
 
 function renderStats(){
   document.getElementById("totalOrders").textContent=history.length;
+
+  const salesLabels=history.map(o=>o.Levermoment);
+  const salesData=history.map(o=>parseFloat(o.Totaal.replace(',','.')));
+
+  if(window.salesChartInstance) window.salesChartInstance.destroy();
+  window.salesChartInstance=new Chart(document.getElementById("salesChart"),{
+    type:'bar',
+    data:{labels:salesLabels,datasets:[{label:'Omzet per bestelling (€)',data:salesData,backgroundColor:'rgba(63,169,245,0.7)'}]},
+    options:{responsive:true,plugins:{legend:{display:false}}}
+  });
+
+  const flavorCount={};
+  history.forEach(o=>{
+    o.Producten.split(',').forEach(p=>{
+      const name=p.trim().split(' x ')[0];
+      flavorCount[name]=(flavorCount[name]||0)+parseInt(p.trim().split(' x ')[1]);
+    });
+  });
+  const flavorLabels=Object.keys(flavorCount);
+  const flavorData=Object.values(flavorCount);
+
+  if(window.flavorsChartInstance) window.flavorsChartInstance.destroy();
+  window.flavorsChartInstance=new Chart(document.getElementById("flavorsChart"),{
+    type:'pie',
+    data:{labels:flavorLabels,datasets:[{data:flavorData,backgroundColor:['#3fa9f5','#2d89d8','#ff6384','#36a2eb','#ffcd56','#4bc0c0']}]},
+    options:{responsive:true}
+  });
 }
 </script>
 </body>
