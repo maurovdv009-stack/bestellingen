@@ -192,52 +192,6 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
-
-        /* Custom Alert Styles */
-        .custom-alert-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .custom-alert-box {
-            background-color: var(--card-background);
-            color: var(--text-color);
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-        }
-
-        .custom-alert-box p {
-            font-size: 1.1rem;
-            margin-bottom: 20px;
-        }
-
-        .custom-alert-ok-btn {
-            background-color: var(--accent-blue);
-            color: white;
-            border: none;
-            padding: 10px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: background-color 0.3s ease;
-        }
-
-        .custom-alert-ok-btn:hover {
-            background-color: #0056b3;
-        }
     </style>
 </head>
 <body>
@@ -291,13 +245,6 @@
         </div>
     </div>
 
-    <div id="custom-alert" class="custom-alert-container hidden">
-        <div class="custom-alert-box">
-            <p id="custom-alert-message"></p>
-            <button id="custom-alert-ok-btn" class="custom-alert-ok-btn">OK</button>
-        </div>
-    </div>
-
     <script>
         const ACTIVE_ORDERS_API_URL = 'https://sheetdb.io/api/v1/pnz12bqkys5sc';
         const HISTORY_API_URL = 'https://sheetdb.io/api/v1/w3rznl3fnrp3n';
@@ -315,23 +262,6 @@
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
             return `${day}/${month}/${year}`;
-        }
-
-        // Functie voor de aangepaste meldingen
-        function showAlert(message) {
-            const customAlert = document.getElementById('custom-alert');
-            const customAlertMessage = document.getElementById('custom-alert-message');
-            const customAlertOkBtn = document.getElementById('custom-alert-ok-btn');
-
-            customAlertMessage.textContent = message;
-            customAlert.classList.remove('hidden');
-
-            return new Promise(resolve => {
-                customAlertOkBtn.onclick = () => {
-                    customAlert.classList.add('hidden');
-                    resolve();
-                };
-            });
         }
 
         async function fetchOrders(tab) {
@@ -407,7 +337,7 @@
         
         async function completeOrder(id, orderData) {
             if (!id) {
-                showAlert('Fout: De bestelling heeft geen geldig ID om te verplaatsen.');
+                alert('Fout: De bestelling heeft geen geldig ID om te verplaatsen.');
                 return;
             }
 
@@ -417,7 +347,7 @@
             });
 
             if (!deleteResponse.ok) {
-                showAlert('Fout bij het verplaatsen van de bestelling.');
+                alert('Fout bij het verplaatsen van de bestelling.');
                 return;
             }
 
@@ -428,17 +358,17 @@
             });
 
             if (!addResponse.ok) {
-                showAlert('Bestelling verplaatst, maar niet correct toegevoegd aan geschiedenis.');
+                alert('Bestelling verplaatst, maar niet correct toegevoegd aan geschiedenis.');
                 return;
             }
 
-            await showAlert('Bestelling is succesvol afgerond en verplaatst naar de geschiedenis.');
+            alert('Bestelling is succesvol afgerond en verplaatst naar de geschiedenis.');
             fetchOrders('activeOrders');
         }
 
         async function deleteOrder(id, isHistory = false) {
             if (!id) {
-                showAlert('Fout: De bestelling heeft geen geldig ID om te verwijderen.');
+                alert('Fout: De bestelling heeft geen geldig ID om te verwijderen.');
                 return;
             }
             
@@ -452,10 +382,10 @@
             });
 
             if (deleteResponse.ok) {
-                await showAlert('Bestelling succesvol verwijderd.');
+                alert('Bestelling succesvol verwijderd.');
                 fetchOrders(isHistory ? 'history' : 'activeOrders');
             } else {
-                showAlert('Fout bij het verwijderen van het item.');
+                alert('Fout bij het verwijderen van het item.');
             }
         }
 
