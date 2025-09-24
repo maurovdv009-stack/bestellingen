@@ -27,22 +27,22 @@ canvas{background:var(--card);border-radius:1em;padding:1em;margin-top:1em;}
 .reset-btn:hover{background:var(--accent-hover);transform:scale(1.05);}
 .yellow-bg{background:#f9d976 !important;color:#000;}
 .green-bg{background:#2ecc71 !important;color:#fff;}
-#loginDiv{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:flex;justify-content:center;align-items:center;z-index:100;}
-#loginDiv form{background:var(--card);padding:2em;border-radius:1em;display:flex;flex-direction:column;gap:1em;width:320px;}
-#loginDiv input{padding:0.6em;border-radius:0.6em;border:1px solid var(--border);background:var(--bg);color:var(--fg);}
-#loginDiv button{background:var(--accent);color:#fff;border:none;padding:0.6em;border-radius:0.6em;cursor:pointer;}
-#loginDiv button:hover{background:var(--accent-hover);}
+#loginModal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:100;}
+#loginModal .login-content{background:var(--card);padding:2em;border-radius:1em;width:320px;text-align:center;}
+#loginModal input{width:100%;padding:0.5em;margin:0.5em 0;border-radius:0.5em;border:1px solid var(--border);background:var(--bg);color:var(--fg);}
+#loginModal button{background:var(--accent);color:#fff;border:none;padding:0.5em 1em;border-radius:0.5em;cursor:pointer;}
+#loginModal button:hover{background:var(--accent-hover);}
 </style>
 </head>
 <body>
 
-<div id="loginDiv">
-<form onsubmit="return login(event)">
-<h2>Login Dashboard</h2>
-<input type="text" id="username" placeholder="Gebruikersnaam" required>
-<input type="password" id="password" placeholder="Wachtwoord" required>
-<button type="submit">Login</button>
-</form>
+<div id="loginModal">
+  <div class="login-content">
+    <h2>Login Dashboard</h2>
+    <input type="text" id="loginUser" placeholder="Username">
+    <input type="password" id="loginPass" placeholder="Password">
+    <button onclick="login()">Login</button>
+  </div>
 </div>
 
 <header style="display:none;">
@@ -101,29 +101,23 @@ canvas{background:var(--card);border-radius:1em;padding:1em;margin-top:1em;}
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-const SHEETDB_API="https://sheetdb.io/api/v1/i1hu5kkuad2pt";
+const USERNAME = "admin";
+const PASSWORD = "wachtwoord123";
 
-let orders=[], history=[];
+let orders = JSON.parse(localStorage.getItem("orders")) || [];
+let history = JSON.parse(localStorage.getItem("history")) || [];
 
-async function fetchOrders(){
-  const res=await fetch(SHEETDB_API);
-  const data=await res.json();
-  orders = data.filter(o=>!o.Status || o.Status!=="Afgerond");
-  history = data.filter(o=>o.Status==="Afgerond");
-  renderOrders(); renderHistory(); renderStats();
-}
-
-function login(e){
-  e.preventDefault();
-  const user=document.getElementById("username").value;
-  const pass=document.getElementById("password").value;
-  // Pas aan naar jouw login
-  if(user==="admin" && pass==="wachtwoord123"){
-    document.getElementById("loginDiv").style.display="none";
+function login() {
+  const u = document.getElementById("loginUser").value;
+  const p = document.getElementById("loginPass").value;
+  if(u===USERNAME && p===PASSWORD){
+    document.getElementById("loginModal").style.display="none";
     document.querySelector("header").style.display="flex";
     document.querySelector("main").style.display="block";
-    fetchOrders();
-  } else { alert("Verkeerde gebruikersnaam of wachtwoord!"); }
+    renderOrders(); renderHistory();
+  } else {
+    alert("Verkeerde username of password!");
+  }
 }
 
 function showTab(tab){
@@ -134,18 +128,32 @@ function showTab(tab){
 }
 
 function renderOrders(){
-  const tbody=document.getElementById('ordersBody');
-  const filter=document.getElementById('filterInput').value.toLowerCase();
-  tbody.innerHTML='';
-  const filtered=orders.filter(o=>o.Naam.toLowerCase().includes(filter)||
-    o.Email.toLowerCase().includes(filter)||
-    o.Levermoment.toLowerCase().includes(filter)||
+  const tbody = document.getElementById('ordersBody');
+  const filter = document.getElementById('filterInput').value.toLowerCase();
+  tbody.innerHTML = '';
+
+  const filtered = orders.filter(o =>
+    o.Naam.toLowerCase().includes(filter) ||
+    o.Email.toLowerCase().includes(filter) ||
+    o.Levermoment.toLowerCase().includes(filter) ||
     o.Producten.toLowerCase().includes(filter)
   );
-  if(filtered.length===0){tbody.innerHTML='<tr><td colspan="7">Geen bestellingen gevonden.</td></tr>'; return;}
-  filtered.forEach(o=>{
-    const row=document.createElement('tr');
-    row.innerHTML=`
+
+  if(filtered.length===0){
+    tbody.innerHTML='<tr><td colspan="7">Geen bestellingen gevonden.</td></tr>';
+    return;
+  }
+
+  filtered.forEach((o)=>{
+    const index = orders.indexOf(o); // correct index
+    const row = document.createElement('tr');
+
+    const today = new Date();
+    const parts = o.Levermoment.split('/');
+    const leverDate = new Date(parts[2], parts[1]-1, parts[0]);
+    if(leverDate - today <= 3*24*60*60*1000 && leverDate >= today) row.className = 'yellow-bg';
+
+    row.innerHTML = `
       <td>${o.Tijd}</td>
       <td>${o.Naam}</td>
       <td>${o.Email}</td>
@@ -153,21 +161,42 @@ function renderOrders(){
       <td>${o.Producten}</td>
       <td>${o.Totaal}</td>
       <td>
-        <button class="status-btn" onclick="completeOrder('${o._id}')">Afgerond</button>
-        <button class="delete-btn" onclick="deleteOrder('${o._id}')">Verwijder</button>
+        <button class="status-btn" onclick="completeOrder(${index})">Afgerond</button>
+        <button class="delete-btn" onclick="deleteOrder(${index})">Verwijder</button>
       </td>
     `;
     tbody.appendChild(row);
   });
 }
 
+function completeOrder(i){
+  const order = orders.splice(i,1)[0];
+  history.push(order);
+  localStorage.setItem('orders', JSON.stringify(orders));
+  localStorage.setItem('history', JSON.stringify(history));
+  renderOrders();
+  renderHistory();
+  renderStats();
+}
+
+function deleteOrder(i){
+  if(confirm("Weet je zeker dat je deze bestelling wilt verwijderen?")){
+    orders.splice(i,1);
+    localStorage.setItem('orders', JSON.stringify(orders));
+    renderOrders();
+  }
+}
+
 function renderHistory(){
-  const tbody=document.getElementById('historyBody');
-  tbody.innerHTML='';
-  if(history.length===0){tbody.innerHTML='<tr><td colspan="6">Geen afgeronde bestellingen.</td></tr>'; return;}
+  const tbody = document.getElementById('historyBody');
+  tbody.innerHTML = '';
+  if(history.length===0){
+    tbody.innerHTML='<tr><td colspan="6">Geen afgeronde bestellingen.</td></tr>';
+    return;
+  }
   history.forEach(o=>{
-    const row=document.createElement('tr');
-    row.innerHTML=`
+    const row = document.createElement('tr');
+    row.innerHTML = `
       <td>${o.Tijd}</td>
       <td>${o.Naam}</td>
       <td>${o.Email}</td>
@@ -179,46 +208,33 @@ function renderHistory(){
   });
 }
 
-async function completeOrder(id){
-  await fetch(`${SHEETDB_API}/_id/${id}`,{
-    method:"PATCH",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({data:{Status:"Afgerond"}})
-  });
-  await fetchOrders();
-}
-
-async function deleteOrder(id){
-  if(confirm("Weet je zeker dat je deze bestelling wilt verwijderen?")){
-    await fetch(`${SHEETDB_API}/_id/${id}`,{method:"DELETE"});
-    await fetchOrders();
-  }
-}
-
 function renderStats(){
   document.getElementById("totalOrders").textContent = history.length;
-  const salesLabels = history.map(o=>o.Levermoment);
-  const salesData = history.map(o=>parseFloat(o.Totaal.replace(',','.')));
+
+  const salesLabels = history.map(o => o.Levermoment);
+  const salesData = history.map(o => parseFloat(o.Totaal.replace(',','.')));
+
   if(window.salesChartInstance) window.salesChartInstance.destroy();
-  window.salesChartInstance = new Chart(document.getElementById('salesChart'),{
-    type:'bar',
-    data:{labels:salesLabels,datasets:[{label:'Omzet per bestelling (€)',data:salesData,backgroundColor:'rgba(63,169,245,0.7)'}]},
-    options:{responsive:true,plugins:{legend:{display:false}}}
+  window.salesChartInstance = new Chart(document.getElementById('salesChart'), {
+    type: 'bar',
+    data: {labels: salesLabels,datasets:[{label:'Omzet per bestelling (€)',data:salesData,backgroundColor:'rgba(63,169,245,0.7)'}]},
+    options: {responsive:true,plugins:{legend:{display:false}}}
   });
 
-  const flavorCount={};
+  const flavorCount = {};
   history.forEach(o=>{
     o.Producten.split(',').forEach(p=>{
-      const [name,qty]=p.trim().split(' x ');
-      flavorCount[name] = (flavorCount[name]||0)+parseInt(qty);
+      const name = p.trim().split(' x ')[0];
+      flavorCount[name] = (flavorCount[name]||0)+parseInt(p.trim().split(' x ')[1]);
     });
   });
-  const flavorLabels=Object.keys(flavorCount);
-  const flavorData=Object.values(flavorCount);
+  const flavorLabels = Object.keys(flavorCount);
+  const flavorData = Object.values(flavorCount);
+
   if(window.flavorsChartInstance) window.flavorsChartInstance.destroy();
-  window.flavorsChartInstance = new Chart(document.getElementById('flavorsChart'),{
-    type:'pie',
-    data:{labels:flavorLabels,datasets:[{data:flavorData,backgroundColor:['#3fa9f5','#2d89d8','#ff6384','#36a2eb','#ffcd56','#4bc0c0']}]},
+  window.flavorsChartInstance = new Chart(document.getElementById('flavorsChart'), {
+    type: 'pie',
+    data: {labels: flavorLabels,datasets:[{data:flavorData,backgroundColor:['#3fa9f5','#2d89d8','#ff6384','#36a2eb','#ffcd56','#4bc0c0']}]},
     options:{responsive:true}
   });
 }
