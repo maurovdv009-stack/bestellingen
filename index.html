@@ -1,427 +1,54 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard — IJssalon Bestellingen</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
-
-        :root {
-            --dark-background: #1a1a1a;
-            --card-background: #2a2a2a;
-            --text-color: #f0f0f0;
-            --accent-blue: #007bff;
-            --success-green: #28a745;
-            --danger-red: #dc3545;
-            --header-height: 70px;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--dark-background);
-            color: var(--text-color);
-            line-height: 1.6;
-            padding: 20px;
-        }
-
-        .dashboard-container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        h1 {
-            color: var(--accent-blue);
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .dashboard-tabs {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-            gap: 10px;
-        }
-
-        .tab-button {
-            background-color: var(--card-background);
-            color: var(--text-color);
-            border: 1px solid #444;
-            padding: 12px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-        }
-
-        .tab-button.active {
-            background-color: var(--accent-blue);
-            border-color: var(--accent-blue);
-        }
-
-        .tab-button:hover {
-            background-color: #383838;
-        }
-
-        .tab-button.active:hover {
-            background-color: #0056b3;
-        }
-
-        .dashboard-section {
-            display: none;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        .dashboard-section.active {
-            display: block;
-        }
-
-        .refresh-btn {
-            background-color: var(--accent-blue);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            transition: background-color 0.3s ease;
-        }
-
-        .refresh-btn:hover {
-            background-color: #0056b3;
-        }
-
-        .orders-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin-top: 20px;
-            background-color: var(--card-background);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .orders-table th,
-        .orders-table td {
-            padding: 15px;
-            text-align: left;
-        }
-
-        .orders-table th {
-            background-color: #333;
-            font-weight: 600;
-        }
-
-        .orders-table tbody tr {
-            transition: background-color 0.3s ease;
-        }
-
-        .orders-table tbody tr:hover {
-            background-color: #383838;
-        }
-        
-        .orders-table tbody tr:not(:last-child) td {
-            border-bottom: 1px solid #444;
-        }
-
-        .items-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .items-list li {
-            font-size: 0.9em;
-            color: #ccc;
-        }
-        
-        .table-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .action-btn {
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            transition: background-color 0.3s ease, transform 0.1s ease;
-        }
-
-        .action-btn:active {
-            transform: scale(0.95);
-        }
-
-        .complete-btn {
-            background-color: var(--success-green);
-            color: white;
-        }
-
-        .complete-btn:hover {
-            background-color: #218838;
-        }
-
-        .delete-btn {
-            background-color: var(--danger-red);
-            color: white;
-        }
-
-        .delete-btn:hover {
-            background-color: #c82333;
-        }
-
-        .loading-message {
-            text-align: center;
-            font-size: 1.2rem;
-            color: #888;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — IJssalon Bestellingen</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+:root{
+--bg:#1a1a1a;--card:#2a2a2a;--txt:#f0f0f0;--blue:#007bff;--green:#28a745;--red:#dc3545
+}*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--txt);line-height:1.6;padding:20px}.dashboard-container{max-width:1400px;margin:0 auto}h1{color:var(--blue);margin-bottom:20px;text-align:center}.dashboard-tabs{display:flex;justify-content:center;margin-bottom:20px;gap:10px}.tab-button{background:var(--card);color:var(--txt);border:1px solid #444;padding:12px 25px;border-radius:8px;cursor:pointer;font-weight:600;transition:0.3s}.tab-button.active{background:var(--blue);border-color:var(--blue)}.tab-button:hover{background:#383838}.tab-button.active:hover{background:#0056b3}.dashboard-section{display:none;animation:fadeIn .5s ease-in-out}.dashboard-section.active{display:block}.refresh-btn{background:var(--blue);color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600;margin-bottom:20px;transition:0.3s}.refresh-btn:hover{background:#0056b3}.orders-table{width:100%;border-collapse:separate;border-spacing:0;margin-top:20px;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,.2)}.orders-table th,.orders-table td{padding:15px;text-align:left}.orders-table th{background:#333;font-weight:600}.orders-table tbody tr:hover{background:#383838}.orders-table tbody tr:not(:last-child) td{border-bottom:1px solid #444}.items-list{list-style:none;padding:0;margin:0}.items-list li{font-size:.9em;color:#ccc}.table-actions{display:flex;gap:10px}.action-btn{padding:8px 12px;border-radius:6px;font-weight:600;cursor:pointer;border:none;transition:0.3s}.action-btn:active{transform:scale(.95)}.complete-btn{background:var(--green);color:#fff}.complete-btn:hover{background:#218838}.delete-btn{background:var(--red);color:#fff}.delete-btn:hover{background:#c82333}.loading-message{text-align:center;font-size:1.2rem;color:#888}@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+</style>
 </head>
 <body>
-
-    <div class="dashboard-container">
-        <h1>IJssalon Bestellingen Dashboard</h1>
-        
-        <div class="dashboard-tabs">
-            <button class="tab-button active" data-tab="activeOrders">Actieve bestellingen</button>
-            <button class="tab-button" data-tab="history">Geschiedenis</button>
-        </div>
-
-        <div id="activeOrders" class="dashboard-section active">
-            <button class="refresh-btn" onclick="fetchOrders('activeOrders')">Vernieuw</button>
-            <p id="loading-active-orders" class="loading-message">Laden van bestellingen...</p>
-            <table class="orders-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Naam</th>
-                        <th>E-mail</th>
-                        <th>Ophaaldatum</th>
-                        <th>Items</th>
-                        <th>Totaal</th>
-                        <th>Acties</th>
-                    </tr>
-                </thead>
-                <tbody id="active-orders-table-body">
-                    </tbody>
-            </table>
-        </div>
-
-        <div id="history" class="dashboard-section">
-            <button class="refresh-btn" onclick="fetchOrders('history')">Vernieuw</button>
-            <p id="loading-history" class="loading-message">Laden van geschiedenis...</p>
-            <table class="orders-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Naam</th>
-                        <th>E-mail</th>
-                        <th>Ophaaldatum</th>
-                        <th>Items</th>
-                        <th>Totaal</th>
-                        <th>Acties</th>
-                    </tr>
-                </thead>
-                <tbody id="history-table-body">
-                    </tbody>
-            </table>
-        </div>
-    </div>
-
-    <script>
-        const ACTIVE_ORDERS_API_URL = 'https://sheetdb.io/api/v1/pnz12bqkys5sc';
-        const HISTORY_API_URL = 'https://sheetdb.io/api/v1/w3rznl3fnrp3n';
-
-        function convertSheetDate(serial) {
-            if (typeof serial !== 'number' || isNaN(serial)) {
-                if (typeof serial === 'string' && serial.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                    const [year, month, day] = serial.split('-');
-                    return `${day}/${month}/${year}`;
-                }
-                return 'N/A';
-            }
-            const date = new Date(1900, 0, serial - 1);
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${day}/${month}/${year}`;
-        }
-
-        async function fetchOrders(tab) {
-            const tableBody = document.getElementById(tab === 'activeOrders' ? 'active-orders-table-body' : 'history-table-body');
-            const loadingMessage = document.getElementById(tab === 'activeOrders' ? 'loading-active-orders' : 'loading-history');
-            
-            tableBody.innerHTML = '';
-            loadingMessage.style.display = 'block';
-
-            const url = tab === 'activeOrders' ? ACTIVE_ORDERS_API_URL : HISTORY_API_URL;
-
-            try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error('Netwerkrespons was niet ok');
-                }
-                const orders = await response.json();
-                
-                loadingMessage.style.display = 'none';
-
-                if (orders.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="${tab === 'activeOrders' ? '7' : '7'}">Geen bestellingen gevonden.</td></tr>`;
-                    return;
-                }
-
-                orders.forEach((order, index) => {
-                    const row = document.createElement('tr');
-                    const itemsHtml = JSON.parse(order.Items).map(item => `
-                        <li>${item.name} (${item.quantity} L) - €${(item.price * item.quantity).toFixed(2).replace('.', ',')}</li>
-                    `).join('');
-
-                    const pickupDateDisplay = convertSheetDate(parseFloat(order.Ophaaldatum));
-                    const totalPriceDisplay = parseFloat(order.Totaalprijs).toFixed(2).replace('.', ',');
-
-                    if (tab === 'activeOrders') {
-                        row.innerHTML = `
-                            <td>${order.ID}</td>
-                            <td>${order.Naam}</td>
-                            <td>${order.Email}</td>
-                            <td>${pickupDateDisplay}</td>
-                            <td><ul class="items-list">${itemsHtml}</ul></td>
-                            <td>€${totalPriceDisplay}</td>
-                            <td>
-                                <div class="table-actions">
-                                    <button class="action-btn complete-btn" data-order-id="${order.ID}" data-order-data='${JSON.stringify(order)}' aria-label="Afgemaakt"><i class="fas fa-check"></i></button>
-                                    <button class="action-btn delete-btn" data-order-id="${order.ID}" aria-label="Verwijder"><i class="fas fa-trash"></i></button>
-                                </div>
-                            </td>
-                        `;
-                    } else { // history tab
-                        row.innerHTML = `
-                            <td>${order.ID || 'N.v.t.'}</td>
-                            <td>${order.Naam}</td>
-                            <td>${order.Email}</td>
-                            <td>${pickupDateDisplay}</td>
-                            <td><ul class="items-list">${itemsHtml}</ul></td>
-                            <td>€${totalPriceDisplay}</td>
-                            <td>
-                                <div class="table-actions">
-                                    <button class="action-btn delete-btn" data-order-id="${order.ID}" aria-label="Verwijder"><i class="fas fa-trash"></i></button>
-                                </div>
-                            </td>
-                        `;
-                    }
-                    tableBody.appendChild(row);
-                });
-
-            } catch (error) {
-                console.error('Fout bij het ophalen van bestellingen:', error);
-                loadingMessage.textContent = 'Fout bij het laden van bestellingen. Probeer het later opnieuw.';
-            }
-        }
-        
-        async function completeOrder(id, orderData) {
-            if (!id) {
-                alert('Fout: De bestelling heeft geen geldig ID om te verplaatsen.');
-                return;
-            }
-
-            const deleteResponse = await fetch(`${ACTIVE_ORDERS_API_URL}/ID/${id}`, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' }
-            });
-
-            if (!deleteResponse.ok) {
-                alert('Fout bij het verplaatsen van de bestelling.');
-                return;
-            }
-
-            const addResponse = await fetch(HISTORY_API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ data: orderData })
-            });
-
-            if (!addResponse.ok) {
-                alert('Bestelling verplaatst, maar niet correct toegevoegd aan geschiedenis.');
-                return;
-            }
-
-            alert('Bestelling is succesvol afgerond en verplaatst naar de geschiedenis.');
-            fetchOrders('activeOrders');
-        }
-
-        async function deleteOrder(id, isHistory = false) {
-            if (!id) {
-                alert('Fout: De bestelling heeft geen geldig ID om te verwijderen.');
-                return;
-            }
-            
-            const confirmed = confirm('Weet je zeker dat je deze bestelling wilt verwijderen? Dit kan niet ongedaan gemaakt worden.');
-            if (!confirmed) return;
-
-            const url = isHistory ? HISTORY_API_URL : ACTIVE_ORDERS_API_URL;
-            const deleteResponse = await fetch(`${url}/ID/${id}`, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' }
-            });
-
-            if (deleteResponse.ok) {
-                alert('Bestelling succesvol verwijderd.');
-                fetchOrders(isHistory ? 'history' : 'activeOrders');
-            } else {
-                alert('Fout bij het verwijderen van het item.');
-            }
-        }
-
-        document.addEventListener('click', (event) => {
-            if (event.target.classList.contains('complete-btn') || event.target.closest('.complete-btn')) {
-                const button = event.target.closest('.complete-btn');
-                const id = button.dataset.orderId;
-                const orderData = JSON.parse(button.dataset.orderData);
-                completeOrder(id, orderData);
-            }
-            if (event.target.classList.contains('delete-btn') || event.target.closest('.delete-btn')) {
-                const button = event.target.closest('.delete-btn');
-                const id = button.dataset.orderId;
-                if (button.closest('#activeOrders')) {
-                    deleteOrder(id);
-                } else if (button.closest('#history')) {
-                    deleteOrder(id, true);
-                }
-            }
-            if (event.target.classList.contains('tab-button')) {
-                const tab = event.target.dataset.tab;
-                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-                document.querySelectorAll('.dashboard-section').forEach(section => section.classList.remove('active'));
-                event.target.classList.add('active');
-                document.getElementById(tab).classList.add('active');
-                if (tab === 'activeOrders') {
-                    fetchOrders('activeOrders');
-                } else {
-                    fetchOrders('history');
-                }
-            }
-        });
-
-        window.onload = () => {
-            fetchOrders('activeOrders');
-        };
-    </script>
+<div class="dashboard-container">
+<h1>IJssalon Bestellingen Dashboard</h1>
+<div class="dashboard-tabs">
+<button class="tab-button active" data-tab="activeOrders">Actieve bestellingen</button>
+<button class="tab-button" data-tab="history">Geschiedenis</button>
+</div>
+<div id="activeOrders" class="dashboard-section active">
+<button class="refresh-btn" onclick="fetchOrders('activeOrders')">Vernieuw</button>
+<p id="loading-active-orders" class="loading-message">Laden van bestellingen...</p>
+<table class="orders-table">
+<thead><tr><th>ID</th><th>Naam</th><th>E-mail</th><th>Ophaaldatum</th><th>Items</th><th>Totaal</th><th>Acties</th></tr></thead>
+<tbody id="active-orders-table-body"></tbody>
+</table>
+</div>
+<div id="history" class="dashboard-section">
+<button class="refresh-btn" onclick="fetchOrders('history')">Vernieuw</button>
+<p id="loading-history" class="loading-message">Laden van geschiedenis...</p>
+<table class="orders-table">
+<thead><tr><th>ID</th><th>Naam</th><th>E-mail</th><th>Ophaaldatum</th><th>Items</th><th>Totaal</th><th>Acties</th></tr></thead>
+<tbody id="history-table-body"></tbody>
+</table>
+</div>
+</div>
+<script>
+const ACTIVE_ORDERS_API_URL='https://sheetdb.io/api/v1/pnz12bqkys5sc';
+const HISTORY_API_URL='https://sheetdb.io/api/v1/w3rznl3fnrp3n';
+function convertSheetDate(s){if(typeof s!=='number'||isNaN(s)){if(typeof s==='string'&&s.match(/^\d{4}-\d{2}-\d{2}$/)){const [y,m,d]=s.split('-');return`${d}/${m}/${y}`}return'N/A'}const d=new Date(1900,0,s-1);return`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`} 
+async function fetchOrders(tab){const tableBody=document.getElementById(tab==='activeOrders'?'active-orders-table-body':'history-table-body');const loadingMessage=document.getElementById(tab==='activeOrders'?'loading-active-orders':'loading-history');tableBody.innerHTML='';loadingMessage.style.display='block';const url=tab==='activeOrders'?ACTIVE_ORDERS_API_URL:HISTORY_API_URL;try{const res=await fetch(url);if(!res.ok)throw new Error('Netwerkrespons was niet ok');const orders=await res.json();loadingMessage.style.display='none';if(!orders.length){tableBody.innerHTML=`<tr><td colspan="7">Geen bestellingen gevonden.</td></tr>`;return}orders.forEach(order=>{const row=document.createElement('tr');const itemsHtml=JSON.parse(order.Items).map(i=>`<li>${i.name} (${i.quantity} L) - €${(i.price*i.quantity).toFixed(2).replace('.',',')}</li>`).join('');const pickup=convertSheetDate(parseFloat(order.Ophaaldatum));const total=parseFloat(order.Totaalprijs).toFixed(2).replace('.',',');row.innerHTML=tab==='activeOrders'?`
+<td>${order.ID}</td><td>${order.Naam}</td><td>${order.Email}</td><td>${pickup}</td><td><ul class="items-list">${itemsHtml}</ul></td><td>€${total}</td>
+<td><div class="table-actions"><button class="action-btn complete-btn" data-order-id="${order.ID}" data-order-data='${JSON.stringify(order)}' aria-label="Afgemaakt"><i class="fas fa-check"></i></button>
+<button class="action-btn delete-btn" data-order-id="${order.ID}" aria-label="Verwijder"><i class="fas fa-trash"></i></button></div></td>`:`
+<td>${order.ID||'N.v.t.'}</td><td>${order.Naam}</td><td>${order.Email}</td><td>${pickup}</td><td><ul class="items-list">${itemsHtml}</ul></td><td>€${total}</td>
+<td><div class="table-actions"><button class="action-btn delete-btn" data-order-id="${order.ID}" aria-label="Verwijder"><i class="fas fa-trash"></i></button></div></td>`;tableBody.appendChild(row)})}catch(e){console.error(e);loadingMessage.textContent='Fout bij het laden van bestellingen. Probeer het later opnieuw.'}}
+async function completeOrder(id,orderData){if(!id){alert('Fout: De bestelling heeft geen geldig ID');return}const del=await fetch(`${ACTIVE_ORDERS_API_URL}/ID/${id}`,{method:'DELETE',headers:{'Content-Type':'application/json'}});if(!del.ok){alert('Fout bij het verplaatsen');return}const add=await fetch(HISTORY_API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:orderData})});if(!add.ok){alert('Bestelling verplaatst, maar niet correct toegevoegd aan geschiedenis');return}alert('Bestelling succesvol afgerond');fetchOrders('activeOrders')}
+async function deleteOrder(id,isHistory=false){if(!id){alert('Fout: De bestelling heeft geen geldig ID');return}if(!confirm('Weet je zeker dat je deze bestelling wilt verwijderen? Dit kan niet ongedaan gemaakt worden.'))return;const url=isHistory?HISTORY_API_URL:ACTIVE_ORDERS_API_URL;const del=await fetch(`${url}/ID/${id}`,{method:'DELETE',headers:{'Content-Type':'application/json'}});if(del.ok){alert('Bestelling succesvol verwijderd');fetchOrders(isHistory?'history':'activeOrders')}else alert('Fout bij het verwijderen van het item')}
+document.addEventListener('click',e=>{if(e.target.classList.contains('complete-btn')||e.target.closest('.complete-btn')){const b=e.target.closest('.complete-btn');completeOrder(b.dataset.orderId,JSON.parse(b.dataset.orderData))}if(e.target.classList.contains('delete-btn')||e.target.closest('.delete-btn')){const b=e.target.closest('.delete-btn');deleteOrder(b.closest('#history')?b.dataset.orderId:true?true:false,b.closest('#history')?true:false)}if(e.target.classList.contains('tab-button')){const t=e.target.dataset.tab;document.querySelectorAll('.tab-button').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.dashboard-section').forEach(s=>s.classList.remove('active'));e.target.classList.add('active');document.getElementById(t).classList.add('active');fetchOrders(t)}});window.onload=()=>fetchOrders('activeOrders');
+</script>
 </body>
 </html>
