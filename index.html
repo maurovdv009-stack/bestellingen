@@ -247,16 +247,21 @@
         const ACTIVE_ORDERS_API_URL = 'https://sheetdb.io/api/v1/pnz12bqkys5sc';
         const HISTORY_API_URL = 'https://sheetdb.io/api/v1/w3rznl3fnrp3n';
 
-        // Functie om een Google Sheets datumgetal te converteren naar een YYYY-MM-DD string
+        // Functie om een Google Sheets datumgetal te converteren naar een DD/MM/JJJJ string
         function convertSheetDate(serial) {
             if (typeof serial !== 'number' || isNaN(serial)) {
+                // Controleert of het een normale datumstring is, zoals "2025-12-25"
+                if (typeof serial === 'string' && serial.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                    const [year, month, day] = serial.split('-');
+                    return `${day}/${month}/${year}`;
+                }
                 return 'N/A'; // Geeft 'N/A' terug als het geen geldig nummer is
             }
             const date = new Date(1900, 0, serial - 1); // -1 om de 1900-bug in Sheets te corrigeren
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
+            return `${day}/${month}/${year}`;
         }
 
         async function fetchOrders(tab) {
