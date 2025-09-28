@@ -246,6 +246,29 @@
     </div>
 
     <script>
+        // -------------------------------
+        // BEGIN LOGIN PROMPT (client-side)
+        // -------------------------------
+        (function() {
+            const USER = "jouwgebruikersnaam";  // pas aan
+            const PASS = "jouwwachtwoord";       // pas aan
+            let loggedIn = false;
+
+            while (!loggedIn) {
+                const userInput = prompt("Gebruikersnaam:");
+                const passInput = prompt("Wachtwoord:");
+                if (userInput === USER && passInput === PASS) {
+                    loggedIn = true;
+                } else {
+                    alert("Foute gebruikersnaam of wachtwoord.");
+                }
+            }
+        })();
+        // -------------------------------
+        // EINDE LOGIN PROMPT
+        // -------------------------------
+
+        // Hieronder komt je bestaande dashboard code (ongewijzigd)
         const ACTIVE_ORDERS_API_URL = 'https://sheetdb.io/api/v1/pnz12bqkys5sc';
         const HISTORY_API_URL = 'https://sheetdb.io/api/v1/w3rznl3fnrp3n';
 
@@ -283,16 +306,13 @@
                 loadingMessage.style.display = 'none';
 
                 if (orders.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="${tab === 'activeOrders' ? '7' : '7'}">Geen bestellingen gevonden.</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="7">Geen bestellingen gevonden.</td></tr>`;
                     return;
                 }
 
-                orders.forEach((order, index) => {
+                orders.forEach((order) => {
                     const row = document.createElement('tr');
-                    const itemsHtml = JSON.parse(order.Items).map(item => `
-                        <li>${item.name} (${item.quantity} L) - €${(item.price * item.quantity).toFixed(2).replace('.', ',')}</li>
-                    `).join('');
-
+                    const itemsHtml = JSON.parse(order.Items).map(item => `<li>${item.name} (${item.quantity} L) - €${(item.price * item.quantity).toFixed(2).replace('.', ',')}</li>`).join('');
                     const pickupDateDisplay = convertSheetDate(parseFloat(order.Ophaaldatum));
                     const totalPriceDisplay = parseFloat(order.Totaalprijs).toFixed(2).replace('.', ',');
 
@@ -311,7 +331,7 @@
                                 </div>
                             </td>
                         `;
-                    } else { // history tab
+                    } else {
                         row.innerHTML = `
                             <td>${order.ID || 'N.v.t.'}</td>
                             <td>${order.Naam}</td>
@@ -336,51 +356,21 @@
         }
         
         async function completeOrder(id, orderData) {
-            if (!id) {
-                alert('Fout: De bestelling heeft geen geldig ID om te verplaatsen.');
-                return;
-            }
-
-            const deleteResponse = await fetch(`${ACTIVE_ORDERS_API_URL}/ID/${id}`, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' }
-            });
-
-            if (!deleteResponse.ok) {
-                alert('Fout bij het verplaatsen van de bestelling.');
-                return;
-            }
-
-            const addResponse = await fetch(HISTORY_API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ data: orderData })
-            });
-
-            if (!addResponse.ok) {
-                alert('Bestelling verplaatst, maar niet correct toegevoegd aan geschiedenis.');
-                return;
-            }
-
+            if (!id) { alert('Fout: De bestelling heeft geen geldig ID om te verplaatsen.'); return; }
+            const deleteResponse = await fetch(`${ACTIVE_ORDERS_API_URL}/ID/${id}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' } });
+            if (!deleteResponse.ok) { alert('Fout bij het verplaatsen van de bestelling.'); return; }
+            const addResponse = await fetch(HISTORY_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: orderData }) });
+            if (!addResponse.ok) { alert('Bestelling verplaatst, maar niet correct toegevoegd aan geschiedenis.'); return; }
             alert('Bestelling is succesvol afgerond en verplaatst naar de geschiedenis.');
             fetchOrders('activeOrders');
         }
 
         async function deleteOrder(id, isHistory = false) {
-            if (!id) {
-                alert('Fout: De bestelling heeft geen geldig ID om te verwijderen.');
-                return;
-            }
-            
+            if (!id) { alert('Fout: De bestelling heeft geen geldig ID om te verwijderen.'); return; }
             const confirmed = confirm('Weet je zeker dat je deze bestelling wilt verwijderen? Dit kan niet ongedaan gemaakt worden.');
             if (!confirmed) return;
-
             const url = isHistory ? HISTORY_API_URL : ACTIVE_ORDERS_API_URL;
-            const deleteResponse = await fetch(`${url}/ID/${id}`, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' }
-            });
-
+            const deleteResponse = await fetch(`${url}/ID/${id}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' } });
             if (deleteResponse.ok) {
                 alert('Bestelling succesvol verwijderd.');
                 fetchOrders(isHistory ? 'history' : 'activeOrders');
@@ -399,11 +389,8 @@
             if (event.target.classList.contains('delete-btn') || event.target.closest('.delete-btn')) {
                 const button = event.target.closest('.delete-btn');
                 const id = button.dataset.orderId;
-                if (button.closest('#activeOrders')) {
-                    deleteOrder(id);
-                } else if (button.closest('#history')) {
-                    deleteOrder(id, true);
-                }
+                if (button.closest('#activeOrders')) { deleteOrder(id); } 
+                else if (button.closest('#history')) { deleteOrder(id, true); }
             }
             if (event.target.classList.contains('tab-button')) {
                 const tab = event.target.dataset.tab;
@@ -411,17 +398,11 @@
                 document.querySelectorAll('.dashboard-section').forEach(section => section.classList.remove('active'));
                 event.target.classList.add('active');
                 document.getElementById(tab).classList.add('active');
-                if (tab === 'activeOrders') {
-                    fetchOrders('activeOrders');
-                } else {
-                    fetchOrders('history');
-                }
+                fetchOrders(tab);
             }
         });
 
-        window.onload = () => {
-            fetchOrders('activeOrders');
-        };
+        window.onload = () => { fetchOrders('activeOrders'); };
     </script>
 </body>
 </html>
