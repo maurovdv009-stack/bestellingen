@@ -1,409 +1,499 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard — IJssalon Bestellingen</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — IJssalon Bestellingen</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
 
-        :root {
-            --dark-background: #1a1a1a;
-            --card-background: #2a2a2a;
-            --text-color: #f0f0f0;
-            --accent-blue: #007bff;
-            --success-green: #28a745;
-            --danger-red: #dc3545;
-            --header-height: 70px;
-        }
+/* --- Dashboard Styles (ongewijzigd) --- */
+:root {
+    --dark-background: #1a1a1a;
+    --card-background: #2a2a2a;
+    --text-color: #f0f0f0;
+    --accent-blue: #007bff;
+    --success-green: #28a745;
+    --danger-red: #dc3545;
+    --header-height: 70px;
+}
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--dark-background);
-            color: var(--text-color);
-            line-height: 1.6;
-            padding: 20px;
-        }
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--dark-background);
+    color: var(--text-color);
+    line-height: 1.6;
+    padding: 20px;
+}
 
-        .dashboard-container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+.dashboard-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
 
-        h1 {
-            color: var(--accent-blue);
-            margin-bottom: 20px;
-            text-align: center;
-        }
+h1 {
+    color: var(--accent-blue);
+    margin-bottom: 20px;
+    text-align: center;
+}
 
-        .dashboard-tabs {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-            gap: 10px;
-        }
+.dashboard-tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    gap: 10px;
+}
 
-        .tab-button {
-            background-color: var(--card-background);
-            color: var(--text-color);
-            border: 1px solid #444;
-            padding: 12px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-        }
+.tab-button {
+    background-color: var(--card-background);
+    color: var(--text-color);
+    border: 1px solid #444;
+    padding: 12px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
 
-        .tab-button.active {
-            background-color: var(--accent-blue);
-            border-color: var(--accent-blue);
-        }
+.tab-button.active {
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+}
 
-        .tab-button:hover {
-            background-color: #383838;
-        }
+.tab-button:hover {
+    background-color: #383838;
+}
 
-        .tab-button.active:hover {
-            background-color: #0056b3;
-        }
+.tab-button.active:hover {
+    background-color: #0056b3;
+}
 
-        .dashboard-section {
-            display: none;
-            animation: fadeIn 0.5s ease-in-out;
-        }
+.dashboard-section {
+    display: none;
+    animation: fadeIn 0.5s ease-in-out;
+}
 
-        .dashboard-section.active {
-            display: block;
-        }
+.dashboard-section.active {
+    display: block;
+}
 
-        .refresh-btn {
-            background-color: var(--accent-blue);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            transition: background-color 0.3s ease;
-        }
+.refresh-btn {
+    background-color: var(--accent-blue);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    transition: background-color 0.3s ease;
+}
 
-        .refresh-btn:hover {
-            background-color: #0056b3;
-        }
+.refresh-btn:hover {
+    background-color: #0056b3;
+}
 
-        .orders-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin-top: 20px;
-            background-color: var(--card-background);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
+.orders-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 20px;
+    background-color: var(--card-background);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
 
-        .orders-table th,
-        .orders-table td {
-            padding: 15px;
-            text-align: left;
-        }
+.orders-table th,
+.orders-table td {
+    padding: 15px;
+    text-align: left;
+}
 
-        .orders-table th {
-            background-color: #333;
-            font-weight: 600;
-        }
+.orders-table th {
+    background-color: #333;
+    font-weight: 600;
+}
 
-        .orders-table tbody tr {
-            transition: background-color 0.3s ease;
-        }
+.orders-table tbody tr {
+    transition: background-color 0.3s ease;
+}
 
-        .orders-table tbody tr:hover {
-            background-color: #383838;
-        }
-        
-        .orders-table tbody tr:not(:last-child) td {
-            border-bottom: 1px solid #444;
-        }
+.orders-table tbody tr:hover {
+    background-color: #383838;
+}
 
-        .items-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
+.orders-table tbody tr:not(:last-child) td {
+    border-bottom: 1px solid #444;
+}
 
-        .items-list li {
-            font-size: 0.9em;
-            color: #ccc;
-        }
-        
-        .table-actions {
-            display: flex;
-            gap: 10px;
-        }
+.items-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
 
-        .action-btn {
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            transition: background-color 0.3s ease, transform 0.1s ease;
-        }
+.items-list li {
+    font-size: 0.9em;
+    color: #ccc;
+}
 
-        .action-btn:active {
-            transform: scale(0.95);
-        }
+.table-actions {
+    display: flex;
+    gap: 10px;
+}
 
-        .complete-btn {
-            background-color: var(--success-green);
-            color: white;
-        }
+.action-btn {
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
 
-        .complete-btn:hover {
-            background-color: #218838;
-        }
+.action-btn:active {
+    transform: scale(0.95);
+}
 
-        .delete-btn {
-            background-color: var(--danger-red);
-            color: white;
-        }
+.complete-btn {
+    background-color: var(--success-green);
+    color: white;
+}
 
-        .delete-btn:hover {
-            background-color: #c82333;
-        }
+.complete-btn:hover {
+    background-color: #218838;
+}
 
-        .loading-message {
-            text-align: center;
-            font-size: 1.2rem;
-            color: #888;
-        }
+.delete-btn {
+    background-color: var(--danger-red);
+    color: white;
+}
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-    </style>
+.delete-btn:hover {
+    background-color: #c82333;
+}
+
+.loading-message {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #888;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* --- Login Overlay Styles --- */
+.login-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.login-box {
+    background: #111;
+    border: 1px solid #333;
+    padding: 28px;
+    border-radius: 12px;
+    width: 320px;
+    box-shadow: 0 6px 30px rgba(0,0,0,0.6);
+    text-align: center;
+}
+
+.login-box h2 {
+    margin-bottom: 12px;
+    color: var(--accent-blue);
+}
+
+.login-box label {
+    display: block;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #ddd;
+}
+
+.login-box input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 6px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: #222;
+    color: #f0f0f0;
+}
+
+.login-box .btn {
+    margin-top: 16px;
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--accent-blue);
+    color: white;
+}
+
+.login-error {
+    margin-top: 10px;
+    color: #ff8b8b;
+    display: none;
+    font-size: 0.9rem;
+}
+</style>
 </head>
 <body>
 
-    <div class="dashboard-container">
-        <h1>IJssalon Bestellingen Dashboard</h1>
-        
-        <div class="dashboard-tabs">
-            <button class="tab-button active" data-tab="activeOrders">Actieve bestellingen</button>
-            <button class="tab-button" data-tab="history">Geschiedenis</button>
-        </div>
+<!-- Login overlay -->
+<div id="loginOverlay" class="login-overlay">
+    <div class="login-box">
+        <h2>Login</h2>
+        <label for="loginUser">Gebruikersnaam</label>
+        <input id="loginUser" type="text" autocomplete="username">
+        <label for="loginPass">Wachtwoord</label>
+        <input id="loginPass" type="password" autocomplete="current-password">
+        <button id="loginBtn" class="btn">Inloggen</button>
+        <div id="loginError" class="login-error">Onjuiste gebruikersnaam of wachtwoord.</div>
+    </div>
+</div>
 
-        <div id="activeOrders" class="dashboard-section active">
-            <button class="refresh-btn" onclick="fetchOrders('activeOrders')">Vernieuw</button>
-            <p id="loading-active-orders" class="loading-message">Laden van bestellingen...</p>
-            <table class="orders-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Naam</th>
-                        <th>E-mail</th>
-                        <th>Ophaaldatum</th>
-                        <th>Items</th>
-                        <th>Totaal</th>
-                        <th>Acties</th>
-                    </tr>
-                </thead>
-                <tbody id="active-orders-table-body">
-                    </tbody>
-            </table>
-        </div>
-
-        <div id="history" class="dashboard-section">
-            <button class="refresh-btn" onclick="fetchOrders('history')">Vernieuw</button>
-            <p id="loading-history" class="loading-message">Laden van geschiedenis...</p>
-            <table class="orders-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Naam</th>
-                        <th>E-mail</th>
-                        <th>Ophaaldatum</th>
-                        <th>Items</th>
-                        <th>Totaal</th>
-                        <th>Acties</th>
-                    </tr>
-                </thead>
-                <tbody id="history-table-body">
-                    </tbody>
-            </table>
-        </div>
+<!-- Dashboard content -->
+<div id="mainContent" style="visibility:hidden;">
+<div class="dashboard-container">
+    <h1>IJssalon Bestellingen Dashboard</h1>
+    
+    <div class="dashboard-tabs">
+        <button class="tab-button active" data-tab="activeOrders">Actieve bestellingen</button>
+        <button class="tab-button" data-tab="history">Geschiedenis</button>
     </div>
 
-    <script>
-        // -------------------------------
-        // BEGIN LOGIN PROMPT (client-side)
-        // -------------------------------
-        (function() {
-            const USER = "mauro";  // pas aan
-            const PASS = "mauroijsadmin";       // pas aan
-            let loggedIn = false;
+    <div id="activeOrders" class="dashboard-section active">
+        <button class="refresh-btn" onclick="fetchOrders('activeOrders')">Vernieuw</button>
+        <p id="loading-active-orders" class="loading-message">Laden van bestellingen...</p>
+        <table class="orders-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Naam</th>
+                    <th>E-mail</th>
+                    <th>Ophaaldatum</th>
+                    <th>Items</th>
+                    <th>Totaal</th>
+                    <th>Acties</th>
+                </tr>
+            </thead>
+            <tbody id="active-orders-table-body">
+                </tbody>
+        </table>
+    </div>
 
-            while (!loggedIn) {
-                const userInput = prompt("Gebruikersnaam:");
-                const passInput = prompt("Wachtwoord:");
-                if (userInput === USER && passInput === PASS) {
-                    loggedIn = true;
-                } else {
-                    alert("Foute gebruikersnaam of wachtwoord.");
-                }
-            }
-        })();
-        // -------------------------------
-        // EINDE LOGIN PROMPT
-        // -------------------------------
+    <div id="history" class="dashboard-section">
+        <button class="refresh-btn" onclick="fetchOrders('history')">Vernieuw</button>
+        <p id="loading-history" class="loading-message">Laden van geschiedenis...</p>
+        <table class="orders-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Naam</th>
+                    <th>E-mail</th>
+                    <th>Ophaaldatum</th>
+                    <th>Items</th>
+                    <th>Totaal</th>
+                    <th>Acties</th>
+                </tr>
+            </thead>
+            <tbody id="history-table-body">
+                </tbody>
+        </table>
+    </div>
+</div>
+</div>
 
-        // Hieronder komt je bestaande dashboard code (ongewijzigd)
-        const ACTIVE_ORDERS_API_URL = 'https://sheetdb.io/api/v1/pnz12bqkys5sc';
-        const HISTORY_API_URL = 'https://sheetdb.io/api/v1/w3rznl3fnrp3n';
+<script>
+// --- LOGIN SCRIPT ---
+const USERS_SHEET_URL = 'https://sheetdb.io/api/v1/y49fs8yoxj64c';
 
-        function convertSheetDate(serial) {
-            if (typeof serial !== 'number' || isNaN(serial)) {
-                if (typeof serial === 'string' && serial.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                    const [year, month, day] = serial.split('-');
-                    return `${day}/${month}/${year}`;
-                }
-                return 'N/A';
-            }
-            const date = new Date(1900, 0, serial - 1);
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
+async function fetchUsers() {
+    const res = await fetch(USERS_SHEET_URL);
+    if (!res.ok) throw new Error('Kon gebruikerslijst niet ophalen.');
+    return res.json();
+}
+
+document.getElementById('loginBtn').addEventListener('click', async () => {
+    const user = document.getElementById('loginUser').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    const errorEl = document.getElementById('loginError');
+
+    if (!user || !pass) {
+        errorEl.textContent = 'Vul gebruikersnaam en wachtwoord in.';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    try {
+        const users = await fetchUsers();
+        const matched = users.find(u => u.username === user && u.password === pass);
+        if (matched) {
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('mainContent').style.visibility = 'visible';
+            fetchOrders('activeOrders');
+        } else {
+            errorEl.textContent = 'Onjuiste gebruikersnaam of wachtwoord.';
+            errorEl.style.display = 'block';
+        }
+    } catch (err) {
+        console.error(err);
+        errorEl.textContent = 'Er is een fout bij het valideren. Probeer later.';
+        errorEl.style.display = 'block';
+    }
+});
+
+document.getElementById('loginPass').addEventListener('keydown', (e)=>{
+    if(e.key==='Enter') document.getElementById('loginBtn').click();
+});
+
+document.getElementById('mainContent').style.visibility = 'hidden';
+</script>
+
+<script>
+// --- DASHBOARD SCRIPT (ongewijzigd) ---
+const ACTIVE_ORDERS_API_URL = 'https://sheetdb.io/api/v1/pnz12bqkys5sc';
+const HISTORY_API_URL = 'https://sheetdb.io/api/v1/w3rznl3fnrp3n';
+
+function convertSheetDate(serial) {
+    if (typeof serial !== 'number' || isNaN(serial)) {
+        if (typeof serial === 'string' && serial.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            const [year, month, day] = serial.split('-');
             return `${day}/${month}/${year}`;
         }
+        return 'N/A';
+    }
+    const date = new Date(1900, 0, serial - 1);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${day}/${month}/${year}`;
+}
 
-        async function fetchOrders(tab) {
-            const tableBody = document.getElementById(tab === 'activeOrders' ? 'active-orders-table-body' : 'history-table-body');
-            const loadingMessage = document.getElementById(tab === 'activeOrders' ? 'loading-active-orders' : 'loading-history');
-            
-            tableBody.innerHTML = '';
-            loadingMessage.style.display = 'block';
-
-            const url = tab === 'activeOrders' ? ACTIVE_ORDERS_API_URL : HISTORY_API_URL;
-
-            try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error('Netwerkrespons was niet ok');
-                }
-                const orders = await response.json();
-                
-                loadingMessage.style.display = 'none';
-
-                if (orders.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="7">Geen bestellingen gevonden.</td></tr>`;
-                    return;
-                }
-
-                orders.forEach((order) => {
-                    const row = document.createElement('tr');
-                    const itemsHtml = JSON.parse(order.Items).map(item => `<li>${item.name} (${item.quantity} L) - €${(item.price * item.quantity).toFixed(2).replace('.', ',')}</li>`).join('');
-                    const pickupDateDisplay = convertSheetDate(parseFloat(order.Ophaaldatum));
-                    const totalPriceDisplay = parseFloat(order.Totaalprijs).toFixed(2).replace('.', ',');
-
-                    if (tab === 'activeOrders') {
-                        row.innerHTML = `
-                            <td>${order.ID}</td>
-                            <td>${order.Naam}</td>
-                            <td>${order.Email}</td>
-                            <td>${pickupDateDisplay}</td>
-                            <td><ul class="items-list">${itemsHtml}</ul></td>
-                            <td>€${totalPriceDisplay}</td>
-                            <td>
-                                <div class="table-actions">
-                                    <button class="action-btn complete-btn" data-order-id="${order.ID}" data-order-data='${JSON.stringify(order)}' aria-label="Afgemaakt"><i class="fas fa-check"></i></button>
-                                    <button class="action-btn delete-btn" data-order-id="${order.ID}" aria-label="Verwijder"><i class="fas fa-trash"></i></button>
-                                </div>
-                            </td>
-                        `;
-                    } else {
-                        row.innerHTML = `
-                            <td>${order.ID || 'N.v.t.'}</td>
-                            <td>${order.Naam}</td>
-                            <td>${order.Email}</td>
-                            <td>${pickupDateDisplay}</td>
-                            <td><ul class="items-list">${itemsHtml}</ul></td>
-                            <td>€${totalPriceDisplay}</td>
-                            <td>
-                                <div class="table-actions">
-                                    <button class="action-btn delete-btn" data-order-id="${order.ID}" aria-label="Verwijder"><i class="fas fa-trash"></i></button>
-                                </div>
-                            </td>
-                        `;
-                    }
-                    tableBody.appendChild(row);
-                });
-
-            } catch (error) {
-                console.error('Fout bij het ophalen van bestellingen:', error);
-                loadingMessage.textContent = 'Fout bij het laden van bestellingen. Probeer het later opnieuw.';
-            }
+async function fetchOrders(tab) {
+    const tableBody = document.getElementById(tab === 'activeOrders' ? 'active-orders-table-body' : 'history-table-body');
+    const loadingMessage = document.getElementById(tab === 'activeOrders' ? 'loading-active-orders' : 'loading-history');
+    tableBody.innerHTML = '';
+    loadingMessage.style.display = 'block';
+    const url = tab === 'activeOrders' ? ACTIVE_ORDERS_API_URL : HISTORY_API_URL;
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Netwerkrespons was niet ok');
+        const orders = await response.json();
+        loadingMessage.style.display = 'none';
+        if (orders.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="7">Geen bestellingen gevonden.</td></tr>`;
+            return;
         }
-        
-        async function completeOrder(id, orderData) {
-            if (!id) { alert('Fout: De bestelling heeft geen geldig ID om te verplaatsen.'); return; }
-            const deleteResponse = await fetch(`${ACTIVE_ORDERS_API_URL}/ID/${id}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' } });
-            if (!deleteResponse.ok) { alert('Fout bij het verplaatsen van de bestelling.'); return; }
-            const addResponse = await fetch(HISTORY_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: orderData }) });
-            if (!addResponse.ok) { alert('Bestelling verplaatst, maar niet correct toegevoegd aan geschiedenis.'); return; }
-            alert('Bestelling is succesvol afgerond en verplaatst naar de geschiedenis.');
-            fetchOrders('activeOrders');
-        }
-
-        async function deleteOrder(id, isHistory = false) {
-            if (!id) { alert('Fout: De bestelling heeft geen geldig ID om te verwijderen.'); return; }
-            const confirmed = confirm('Weet je zeker dat je deze bestelling wilt verwijderen? Dit kan niet ongedaan gemaakt worden.');
-            if (!confirmed) return;
-            const url = isHistory ? HISTORY_API_URL : ACTIVE_ORDERS_API_URL;
-            const deleteResponse = await fetch(`${url}/ID/${id}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' } });
-            if (deleteResponse.ok) {
-                alert('Bestelling succesvol verwijderd.');
-                fetchOrders(isHistory ? 'history' : 'activeOrders');
+        orders.forEach((order) => {
+            const row = document.createElement('tr');
+            const itemsHtml = JSON.parse(order.Items).map(item => `<li>${item.name} (${item.quantity} L) - €${(item.price * item.quantity).toFixed(2).replace('.', ',')}</li>`).join('');
+            const pickupDateDisplay = convertSheetDate(parseFloat(order.Ophaaldatum));
+            const totalPriceDisplay = parseFloat(order.Totaalprijs).toFixed(2).replace('.', ',');
+            if (tab === 'activeOrders') {
+                row.innerHTML = `
+                    <td>${order.ID}</td>
+                    <td>${order.Naam}</td>
+                    <td>${order.Email}</td>
+                    <td>${pickupDateDisplay}</td>
+                    <td><ul class="items-list">${itemsHtml}</ul></td>
+                    <td>€${totalPriceDisplay}</td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="action-btn complete-btn" data-order-id="${order.ID}" data-order-data='${JSON.stringify(order)}' aria-label="Afgemaakt"><i class="fas fa-check"></i></button>
+                            <button class="action-btn delete-btn" data-order-id="${order.ID}" aria-label="Verwijder"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>`;
             } else {
-                alert('Fout bij het verwijderen van het item.');
+                row.innerHTML = `
+                    <td>${order.ID || 'N.v.t.'}</td>
+                    <td>${order.Naam}</td>
+                    <td>${order.Email}</td>
+                    <td>${pickupDateDisplay}</td>
+                    <td><ul class="items-list">${itemsHtml}</ul></td>
+                    <td>€${totalPriceDisplay}</td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="action-btn delete-btn" data-order-id="${order.ID}" aria-label="Verwijder"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>`;
             }
-        }
-
-        document.addEventListener('click', (event) => {
-            if (event.target.classList.contains('complete-btn') || event.target.closest('.complete-btn')) {
-                const button = event.target.closest('.complete-btn');
-                const id = button.dataset.orderId;
-                const orderData = JSON.parse(button.dataset.orderData);
-                completeOrder(id, orderData);
-            }
-            if (event.target.classList.contains('delete-btn') || event.target.closest('.delete-btn')) {
-                const button = event.target.closest('.delete-btn');
-                const id = button.dataset.orderId;
-                if (button.closest('#activeOrders')) { deleteOrder(id); } 
-                else if (button.closest('#history')) { deleteOrder(id, true); }
-            }
-            if (event.target.classList.contains('tab-button')) {
-                const tab = event.target.dataset.tab;
-                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-                document.querySelectorAll('.dashboard-section').forEach(section => section.classList.remove('active'));
-                event.target.classList.add('active');
-                document.getElementById(tab).classList.add('active');
-                fetchOrders(tab);
-            }
+            tableBody.appendChild(row);
         });
+    } catch (error) {
+        console.error('Fout bij het ophalen van bestellingen:', error);
+        loadingMessage.textContent = 'Fout bij het laden van bestellingen. Probeer het later opnieuw.';
+    }
+}
 
-        window.onload = () => { fetchOrders('activeOrders'); };
-    </script>
+async function completeOrder(id, orderData) {
+    if (!id) { alert('Fout: De bestelling heeft geen geldig ID om te verplaatsen.'); return; }
+    const deleteResponse = await fetch(`${ACTIVE_ORDERS_API_URL}/ID/${id}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' } });
+    if (!deleteResponse.ok) { alert('Fout bij het verplaatsen van de bestelling.'); return; }
+    const addResponse = await fetch(HISTORY_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: orderData }) });
+    if (!addResponse.ok) { alert('Bestelling verplaatst, maar niet correct toegevoegd aan geschiedenis.'); return; }
+    alert('Bestelling is succesvol afgerond en verplaatst naar de geschiedenis.');
+    fetchOrders('activeOrders');
+}
+
+async function deleteOrder(id, isHistory = false) {
+    if (!id) { alert('Fout: De bestelling heeft geen geldig ID om te verwijderen.'); return; }
+    const confirmed = confirm('Weet je zeker dat je deze bestelling wilt verwijderen? Dit kan niet ongedaan gemaakt worden.');
+    if (!confirmed) return;
+    const url = isHistory ? HISTORY_API_URL : ACTIVE_ORDERS_API_URL;
+    const deleteResponse = await fetch(`${url}/ID/${id}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' } });
+    if (deleteResponse.ok) {
+        alert('Bestelling succesvol verwijderd.');
+        fetchOrders(isHistory ? 'history' : 'activeOrders');
+    } else {
+        alert('Fout bij het verwijderen van het item.');
+    }
+}
+
+document.addEventListener('click', (event) => {
+    if (event.target.classList.contains('complete-btn') || event.target.closest('.complete-btn')) {
+        const button = event.target.closest('.complete-btn');
+        const id = button.dataset.orderId;
+        const orderData = JSON.parse(button.dataset.orderData);
+        completeOrder(id, orderData);
+    }
+    if (event.target.classList.contains('delete-btn') || event.target.closest('.delete-btn')) {
+        const button = event.target.closest('.delete-btn');
+        const id = button.dataset.orderId;
+        if (button.closest('#activeOrders')) { deleteOrder(id); } 
+        else if (button.closest('#history')) { deleteOrder(id, true); }
+    }
+    if (event.target.classList.contains('tab-button')) {
+        const tab = event.target.dataset.tab;
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.dashboard-section').forEach(section => section.classList.remove('active'));
+        event.target.classList.add('active');
+        document.getElementById(tab).classList.add('active');
+        fetchOrders(tab);
+    }
+});
+
+window.onload = () => { fetchOrders('activeOrders'); };
+</script>
 </body>
 </html>
-
